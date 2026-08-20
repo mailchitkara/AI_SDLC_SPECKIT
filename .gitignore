@@ -1,0 +1,25 @@
+# Node / frontend
+node_modules/
+frontend/dist/
+frontend/build/
+frontend/coverage/
+*.log
+npm-debug.log*
+.env
+.env.*
+!.env.example
+
+# .NET / backend
+backend/**/bin/
+backend/**/obj/
+*.user
+*.suo
+backend/**/TestResults/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
