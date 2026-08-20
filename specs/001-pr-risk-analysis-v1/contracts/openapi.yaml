@@ -1,0 +1,184 @@
+openapi: 3.0.3
+info:
+  title: AgentGuard V1 - PR Risk Analysis API
+  version: "1.0.0"
+  description: >
+    Single synchronous endpoint that accepts one pull request's change data
+    and returns a deterministic risk analysis. No authentication, no
+    persistence, no external AI calls (see spec.md Assumptions and FR-018..FR-021).
+
+paths:
+  /api/pr-risk-analysis:
+    post:
+      operationId: analyzePullRequest
+      summary: Analyze one pull request's change data and return its risk analysis.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PullRequestChangeSet'
+      responses:
+        '200':
+          description: Deterministic risk analysis for the submitted PR.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskAnalysisResult'
+        '400':
+          description: >
+            The submitted change data is missing required fields or is
+            malformed (FR-002).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+
+components:
+  schemas:
+    ChangeType:
+      type: string
+      enum: [ADDED, MODIFIED, DELETED, RENAMED]
+
+    ChangedFile:
+      type: object
+      required: [path, changeType, linesAdded, linesDeleted]
+      properties:
+        path:
+          type: string
+        changeType:
+          $ref: '#/components/schemas/ChangeType'
+        oldContent:
+          type: string
+          nullable: true
+        newContent:
+          type: string
+          nullable: true
+        linesAdded:
+          type: integer
+          minimum: 0
+        linesDeleted:
+          type: integer
+          minimum: 0
+
+    PullRequestChangeSet:
+      type: object
+      required: [repositoryName, prNumber, prTitle, changedFiles]
+      properties:
+        repositoryName:
+          type: string
+          minLength: 1
+        prNumber:
+          type: integer
+          minimum: 1
+        prTitle:
+          type: string
+          minLength: 1
+        changedFiles:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChangedFile'
+
+    Severity:
+      type: string
+      enum: [INFO, LOW, MEDIUM, HIGH, BLOCKER]
+      description: "Scoring weight: INFO=0, LOW=10, MEDIUM=20, HIGH=35, BLOCKER=100 (FR-012)."
+
+    RuleId:
+      type: string
+      enum:
+        - LARGE_CHANGE_SIZE
+        - MISSING_RELATED_TESTS
+        - API_CONTRACT_BREAKING_CHANGE
+        - ARCHITECTURE_VIOLATION
+        - SECRET_DETECTED
+
+    Finding:
+      type: object
+      required: [ruleId, ruleName, severity, explanation, evidence, remediation]
+      properties:
+        ruleId:
+          $ref: '#/components/schemas/RuleId'
+        ruleName:
+          type: string
+        severity:
+          $ref: '#/components/schemas/Severity'
+        explanation:
+          type: string
+        evidence:
+          type: string
+          description: "For SECRET_DETECTED findings, always masked — never the raw secret (FR-010)."
+        location:
+          type: string
+          nullable: true
+          description: "Omitted (null) when no single file/location applies (FR-009)."
+        remediation:
+          type: string
+
+    CheckResult:
+      type: object
+      required: [ruleId, ruleName, passed]
+      properties:
+        ruleId:
+          $ref: '#/components/schemas/RuleId'
+        ruleName:
+          type: string
+        passed:
+          type: boolean
+
+    RiskClassification:
+      type: string
+      enum: [LOW, MEDIUM, HIGH, CRITICAL]
+
+    Recommendation:
+      type: string
+      enum: [SAFE_TO_REVIEW, REVIEW_RECOMMENDED, HUMAN_REVIEW_REQUIRED, BLOCK_MERGE]
+
+    RiskAnalysisResult:
+      type: object
+      required:
+        - repositoryName
+        - prNumber
+        - prTitle
+        - score
+        - classification
+        - recommendation
+        - checks
+        - findings
+      properties:
+        repositoryName:
+          type: string
+        prNumber:
+          type: integer
+        prTitle:
+          type: string
+        score:
+          type: integer
+          minimum: 0
+          maximum: 100
+        classification:
+          $ref: '#/components/schemas/RiskClassification'
+        recommendation:
+          $ref: '#/components/schemas/Recommendation'
+        checks:
+          type: array
+          minItems: 5
+          maxItems: 5
+          items:
+            $ref: '#/components/schemas/CheckResult'
+        findings:
+          type: array
+          items:
+            $ref: '#/components/schemas/Finding'
+
+    ValidationError:
+      type: object
+      required: [message, errors]
+      properties:
+        message:
+          type: string
+        errors:
+          type: array
+          items:
+            type: string
+          description: One entry per missing/malformed field.
