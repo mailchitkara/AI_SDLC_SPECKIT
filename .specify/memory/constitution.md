@@ -1,50 +1,132 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+## User Interface & Experience
 
-## Core Principles
+AgentGuard MUST provide a web-based user interface for developers and
+engineering teams to understand pull-request risk and individual findings.
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+The UI is a first-class AgentGuard interface alongside the Core library,
+API and future CLI.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### UI Principles
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+The UI MUST:
+- use React + TypeScript + Vite
+- communicate risk clearly and visually
+- prioritise findings and evidence over decorative dashboards
+- make every risk score explainable
+- clearly distinguish BLOCKER, HIGH, MEDIUM, LOW and INFO findings
+- allow a developer to understand why a check failed without reading raw logs
+- provide actionable remediation guidance
+- remain simple and responsive
+- meet reasonable accessibility standards
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### V1 Dashboard
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+The initial UI should support a PR Risk Analysis experience containing:
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+- Repository name
+- Pull request identifier and title
+- Overall risk score from 0-100
+- Overall risk classification
+- Summary of passed and failed checks
+- Findings grouped or filterable by severity
+- Rule name
+- Explanation
+- Evidence
+- Affected file/location where available
+- Suggested remediation
+- Overall recommendation such as:
+  - SAFE TO REVIEW
+  - REVIEW RECOMMENDED
+  - HUMAN REVIEW REQUIRED
+  - BLOCK MERGE
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+Example conceptual layout:
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+AgentGuard
+------------------------------------------------
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+Repository: agentguard-demo
+PR #42: Add Customer Preferences API
 
-## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
+RISK SCORE
+72 / 100
+HIGH
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+Checks
+------------------------------------------------
+PASS    Build                         Passed
+PASS    Tests                         48/48
+BLOCK   API Contract                  Breaking change
+HIGH    Architecture                  Dependency violation
+MEDIUM  Test Coverage                 Missing related tests
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+Findings
+------------------------------------------------
+
+API-001 | BLOCKER
+Customer.email removed from API response
+
+Evidence:
+contracts/customer.yaml
+
+Recommendation:
+Restore the property or explicitly version the API.
+
+### Separation of Concerns
+
+The React frontend MUST NOT implement risk-analysis business rules.
+
+The frontend displays results produced by the backend.
+
+The ASP.NET Core API orchestrates requests and exposes AgentGuard.Core
+capabilities through REST endpoints.
+
+AgentGuard.Core remains responsible for deterministic analysis,
+findings and risk calculation.
+
+The intended architecture is:
+
+React UI
+   |
+   | REST
+   v
+ASP.NET Core API
+   |
+   v
+AgentGuard.Core
+   |
+   +-- Rules
+   +-- Findings
+   +-- Risk Engine
+   +-- Policy Engine
+
+UI-specific requirements MUST NOT leak into AgentGuard.Core.
+
+### UI Contract & Accessibility
+
+The React UI MUST consume AgentGuard through documented REST API contracts.
+
+Frontend components MUST NOT depend on internal AgentGuard.Core implementation details.
+
+Any displayed risk score MUST include the findings that contributed to the score.
+
+The V1 UI SHOULD support:
+- keyboard navigation
+- accessible labels
+- sufficient contrast
+- responsive layouts for common desktop and tablet widths
+
+### Future UI Direction
+
+The architecture may support future capabilities such as:
+
+- repository overview
+- PR risk history
+- engineering risk trends
+- policy configuration
+- rule management
+- spec-to-code compliance
+- AI vs human-generated change analysis
+- engineering leadership dashboards
+
+These capabilities MUST NOT be implemented until separately specified.
