@@ -1,0 +1,6 @@
+@AgentGuard.Api_HostAddress = http://localhost:5003
+
+GET {{AgentGuard.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

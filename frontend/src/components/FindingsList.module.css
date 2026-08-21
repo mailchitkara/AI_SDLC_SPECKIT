@@ -1,0 +1,100 @@
+.findings {
+  border: 1px solid #3a3a3a;
+  border-radius: 8px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.toolbar label {
+  margin-right: 0.5rem;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.card {
+  border: 1px solid #3a3a3a;
+  border-radius: 6px;
+  padding: 0.9rem 1rem;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.4rem;
+}
+
+.ruleName {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.explanation {
+  margin: 0 0 0.6rem;
+}
+
+.details {
+  margin: 0;
+}
+
+.details dt {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  opacity: 0.7;
+  margin-top: 0.5rem;
+}
+
+.details dd {
+  margin: 0.1rem 0 0;
+}
+
+.severityBadge {
+  display: inline-block;
+  padding: 0.1rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.severityBLOCKER {
+  background: #d1293d;
+  color: #fff;
+}
+
+.severityHIGH {
+  background: #c1440e;
+  color: #fff;
+}
+
+.severityMEDIUM {
+  background: #9a6b00;
+  color: #fff;
+}
+
+.severityLOW {
+  background: #1b7f3a;
+  color: #fff;
+}
+
+.severityINFO {
+  background: #55606d;
+  color: #fff;
+}
