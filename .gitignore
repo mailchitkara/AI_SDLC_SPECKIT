@@ -3,11 +3,13 @@ node_modules/
 frontend/dist/
 frontend/build/
 frontend/coverage/
+frontend/.vite/
 *.log
 npm-debug.log*
 .env
 .env.*
 !.env.example
+
 
 # .NET / backend
 backend/**/bin/
