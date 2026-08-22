@@ -14,3 +14,26 @@ services:
     envVars:
       - key: ASPNETCORE_ENVIRONMENT
         value: Production
+      - key: FRONTEND_ORIGIN
+        fromService:
+          type: web
+          name: agentguard-frontend
+          property: host
+
+  - type: web
+    name: agentguard-frontend
+    runtime: static
+    repo: https://github.com/mailchitkara/AI_SDLC_SPECKIT
+    branch: main
+    # See agentguard-api above for why this is off — the GitHub Actions "deploy" job triggers
+    # deploys explicitly once CI passes, rather than Render watching pushes itself.
+    autoDeploy: false
+    buildCommand: cd frontend && npm ci && npm run build
+    staticPublishPath: ./frontend/dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://agentguard-api-ifb3.onrender.com
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
