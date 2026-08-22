@@ -14,6 +14,9 @@ public sealed record FindingResponse(
 
 public sealed record CheckResultResponse(string RuleId, string RuleName, bool Passed);
 
+/// <summary>data-model.md: a file whose content GitHub could not serve inline (FR-009).</summary>
+public sealed record PartiallyEvaluatedFileResponse(string Path, string Reason);
+
 public sealed record RiskAnalysisResultResponse(
     string RepositoryName,
     int PrNumber,
@@ -22,13 +25,16 @@ public sealed record RiskAnalysisResultResponse(
     string Classification,
     string Recommendation,
     IReadOnlyList<CheckResultResponse> Checks,
-    IReadOnlyList<FindingResponse> Findings);
+    IReadOnlyList<FindingResponse> Findings,
+    IReadOnlyList<PartiallyEvaluatedFileResponse> PartiallyEvaluatedFiles);
 
 public sealed record ValidationErrorResponse(string Message, IReadOnlyList<string> Errors);
 
 public static class RiskAnalysisResultResponseMapping
 {
-    public static RiskAnalysisResultResponse ToResponse(this RiskAnalysisResult result) => new(
+    public static RiskAnalysisResultResponse ToResponse(
+        this RiskAnalysisResult result,
+        IReadOnlyList<PartiallyEvaluatedFileResponse>? partiallyEvaluatedFiles = null) => new(
         RepositoryName: result.RepositoryName,
         PrNumber: result.PrNumber,
         PrTitle: result.PrTitle,
@@ -44,5 +50,6 @@ public static class RiskAnalysisResultResponseMapping
                 f.Evidence,
                 f.Location,
                 f.Remediation))
-            .ToList());
+            .ToList(),
+        PartiallyEvaluatedFiles: partiallyEvaluatedFiles ?? []);
 }
