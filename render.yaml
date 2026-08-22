@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: agentguard-api
+    runtime: docker
+    repo: https://github.com/mailchitkara/AI_SDLC_SPECKIT
+    branch: main
+    # Deploys are triggered explicitly by the GitHub Actions "deploy" job (ci.yml), gated on
+    # the build/test jobs succeeding — not by Render watching pushes to this branch itself.
+    autoDeploy: false
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /health
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production

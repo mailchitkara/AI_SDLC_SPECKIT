@@ -6,8 +6,19 @@ var builder = WebApplication.CreateBuilder(args);
 
 const string FrontendDevCorsPolicy = "FrontendDev";
 
+// Render (and similar platforms) assign the listen port dynamically via PORT at container
+// start — only known at runtime, so it can't be baked into an image-level ASPNETCORE_URLS.
+// Left untouched for local development, where PORT is normally unset and launchSettings.json
+// / --urls continues to control the port as before.
+var port = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrEmpty(port))
+{
+    builder.WebHost.UseUrls($"http://+:{port}");
+}
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHealthChecks();
 
 builder.Services.AddCors(options =>
 {
@@ -31,6 +42,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors(FrontendDevCorsPolicy);
+
+// Independent of AgentGuardAnalyzer/the rules pipeline, so a healthy response here means the
+// process itself is up — suitable for Render's health check (FR-003).
+app.MapHealthChecks("/health");
 
 app.MapPrRiskAnalysisEndpoint();
 
