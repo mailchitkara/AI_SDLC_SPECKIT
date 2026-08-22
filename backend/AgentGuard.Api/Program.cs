@@ -1,4 +1,5 @@
 using AgentGuard.Api.Endpoints;
+using AgentGuard.Api.GitHub;
 using AgentGuard.Core;
 using AgentGuard.Core.PolicyEngine;
 
@@ -42,6 +43,15 @@ builder.Services.AddCors(options =>
 builder.Services.AddSingleton(ForbiddenDependencyConfig.Empty);
 builder.Services.AddSingleton<AgentGuardAnalyzer>();
 
+// GitHub requires a User-Agent on every request; base address keeps GitHubPullRequestClient's
+// call sites relative (003-github-pr-import plan.md, research.md §1).
+builder.Services.AddHttpClient<IGitHubPullRequestClient, GitHubPullRequestClient>(client =>
+{
+    client.BaseAddress = new Uri("https://api.github.com");
+    client.DefaultRequestHeaders.UserAgent.ParseAdd("AgentGuard");
+    client.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github+json");
+});
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -57,6 +67,7 @@ app.UseCors(FrontendDevCorsPolicy);
 app.MapHealthChecks("/health");
 
 app.MapPrRiskAnalysisEndpoint();
+app.MapPrReferenceAnalysisEndpoint();
 
 app.Run();
 
