@@ -1,0 +1,99 @@
+name: AgentGuard Gate Self-Test
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+jobs:
+  self-test:
+    name: Self-test agentguard-pr-gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # US1: analyzes the exact triggering PR from ambient context, no manual input.
+      - name: Run gate against the triggering PR (default policy)
+        id: run1
+        uses: ./.github/actions/agentguard-pr-gate
+        with:
+          api-url: https://agentguard-api-ifb3.onrender.com
+
+      - name: Assert outputs are present and well-formed
+        run: |
+          status="${{ steps.run1.outputs.status }}"
+          echo "status=$status"
+          if [ "$status" != "completed" ] && [ "$status" != "unavailable" ]; then
+            echo "::error::Unexpected status output: '$status'"; exit 1
+          fi
+          if [ "$status" = "completed" ]; then
+            [ -n "${{ steps.run1.outputs.score }}" ] || { echo "::error::score output missing"; exit 1; }
+            [ -n "${{ steps.run1.outputs.classification }}" ] || { echo "::error::classification output missing"; exit 1; }
+            [ -n "${{ steps.run1.outputs.recommendation }}" ] || { echo "::error::recommendation output missing"; exit 1; }
+          fi
+
+      # US1 Acceptance Scenario 3 / quickstart.md Scenario 3: re-run against the same, unchanged
+      # PR is deterministic.
+      - name: Run gate again against the same PR
+        id: run2
+        uses: ./.github/actions/agentguard-pr-gate
+        with:
+          api-url: https://agentguard-api-ifb3.onrender.com
+
+      - name: Assert the two runs are identical
+        run: |
+          [ "${{ steps.run1.outputs.status }}" = "${{ steps.run2.outputs.status }}" ] || { echo "::error::status differs between runs"; exit 1; }
+          [ "${{ steps.run1.outputs.score }}" = "${{ steps.run2.outputs.score }}" ] || { echo "::error::score differs between runs"; exit 1; }
+          [ "${{ steps.run1.outputs.classification }}" = "${{ steps.run2.outputs.classification }}" ] || { echo "::error::classification differs between runs"; exit 1; }
+          [ "${{ steps.run1.outputs.recommendation }}" = "${{ steps.run2.outputs.recommendation }}" ] || { echo "::error::recommendation differs between runs"; exit 1; }
+
+      # quickstart.md Scenario 4 / FR-009: fail-open by default when analysis is unavailable.
+      - name: Run gate against an unreachable API (default fail-open)
+        id: unreachable-default
+        continue-on-error: true
+        uses: ./.github/actions/agentguard-pr-gate
+        with:
+          api-url: https://agentguard-api-does-not-exist.invalid
+
+      - name: Assert fail-open succeeded with status=unavailable
+        run: |
+          if [ "${{ steps.unreachable-default.outcome }}" != "success" ]; then
+            echo "::error::Expected the step to succeed (fail-open) when analysis is unavailable, but it failed."; exit 1
+          fi
+          if [ "${{ steps.unreachable-default.outputs.status }}" != "unavailable" ]; then
+            echo "::error::Expected status=unavailable, got '${{ steps.unreachable-default.outputs.status }}'"; exit 1
+          fi
+
+      # quickstart.md Scenario 5 / FR-004a: fail-closed when explicitly configured.
+      - name: Run gate against an unreachable API (fail-closed configured)
+        id: unreachable-failclosed
+        continue-on-error: true
+        uses: ./.github/actions/agentguard-pr-gate
+        with:
+          api-url: https://agentguard-api-does-not-exist.invalid
+          fail-on-unavailable: 'true'
+
+      - name: Assert fail-closed failed the step
+        run: |
+          if [ "${{ steps.unreachable-failclosed.outcome }}" != "failure" ]; then
+            echo "::error::Expected the step to fail (fail-closed) when analysis is unavailable and fail-on-unavailable=true."; exit 1
+          fi
+
+      # US3: a Check Run named "AgentGuard PR Risk Gate" should now be visible on this PR,
+      # published by run1/run2 above (superseding, not duplicating, across the two runs — FR-007).
+      - name: Assert a Check Run was published
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          count=$(gh api "repos/${{ github.repository }}/commits/${{ github.event.pull_request.head.sha }}/check-runs" \
+            --jq '[.check_runs[] | select(.name == "AgentGuard PR Risk Gate")] | length')
+          if [ "$count" -lt 1 ]; then
+            echo "::error::Expected at least one 'AgentGuard PR Risk Gate' check run on this PR's head SHA, found $count."; exit 1
+          fi
+          if [ "$count" -gt 1 ]; then
+            echo "::error::Expected exactly one 'AgentGuard PR Risk Gate' check run (updated in place across the two runs above), found $count — FR-007 violated."; exit 1
+          fi
