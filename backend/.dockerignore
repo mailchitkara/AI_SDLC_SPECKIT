@@ -1,0 +1,21 @@
+## Build output
+**/bin/
+**/obj/
+
+## Test projects (not needed in the runtime image)
+AgentGuard.Core.Tests/
+AgentGuard.Api.Tests/
+
+## VCS / editor / OS
+.git/
+.gitignore
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+.DS_Store
+Thumbs.db
+
+## Local docs, not needed in the image
+*.md
