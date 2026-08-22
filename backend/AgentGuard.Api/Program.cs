@@ -20,8 +20,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHealthChecks();
 
-// FRONTEND_ORIGIN is wired via render.yaml's fromService (property: host), which yields a bare
-// hostname with no scheme — prefix it so it matches the browser's Origin header.
+// FRONTEND_ORIGIN is set in render.yaml as a full URL; the scheme check is defensive in case
+// it's ever set to a bare hostname instead.
 var allowedOrigins = new List<string> { "http://localhost:5173", "http://127.0.0.1:5173" };
 var frontendOrigin = Environment.GetEnvironmentVariable("FRONTEND_ORIGIN");
 if (!string.IsNullOrEmpty(frontendOrigin))

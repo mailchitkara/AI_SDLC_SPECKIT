@@ -15,10 +15,10 @@ services:
       - key: ASPNETCORE_ENVIRONMENT
         value: Production
       - key: FRONTEND_ORIGIN
-        fromService:
-          type: web
-          name: agentguard-frontend
-          property: host
+        # fromService/property:host resolves to Render's internal private-network hostname, not
+        # the public *.onrender.com URL a browser's Origin header actually sends — hardcoded
+        # instead, same as VITE_API_BASE_URL below.
+        value: https://agentguard-frontend-grar.onrender.com
 
   - type: web
     name: agentguard-frontend
