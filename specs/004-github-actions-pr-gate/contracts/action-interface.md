@@ -11,6 +11,7 @@ This is the public interface a workflow author codes against — `.github/action
 | `block-on` | no | `CRITICAL` | `Gate Policy.block-on` (comma-separated list, e.g. `HIGH,CRITICAL`) |
 | `fail-on-unavailable` | no | `false` | `Gate Policy.fail-on-unavailable` |
 | `timeout-seconds` | no | `60` | `Gate Policy.timeout-seconds` |
+| `check-name` | no | `AgentGuard PR Risk Gate` | Name of the Published Result's Check Run. Added after the first live self-test run: `publish-result.sh` updates a Check Run in place by name+SHA (FR-007), so a workflow invoking this action more than once against the same PR/SHA (e.g. a self-test exercising multiple configurations) must give each invocation a distinct `check-name`, or later calls silently overwrite earlier ones' real result. Real gating usage should leave this at its default, since branch protection references it by name. |
 
 ## Outputs
 

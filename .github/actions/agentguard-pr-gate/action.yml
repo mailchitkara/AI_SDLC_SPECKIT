@@ -21,6 +21,10 @@ inputs:
     description: 'How long to wait for the AgentGuard analysis call before treating it as unavailable.'
     required: false
     default: '60'
+  check-name:
+    description: 'Name of the Check Run this publishes. Override only for testing multiple configurations against the same PR in one workflow (e.g. a self-test) — each name is updated independently, so the default should stay untouched for real gating usage, since branch protection references it by name.'
+    required: false
+    default: 'AgentGuard PR Risk Gate'
 
 outputs:
   status:
@@ -76,6 +80,7 @@ runs:
       shell: bash
       env:
         GITHUB_TOKEN_INPUT: ${{ inputs.github-token }}
+        CHECK_NAME: ${{ inputs.check-name }}
       run: bash "${{ github.action_path }}/scripts/publish-result.sh"
 
     # Publishing (above) always runs before this resolves the step's exit code, per

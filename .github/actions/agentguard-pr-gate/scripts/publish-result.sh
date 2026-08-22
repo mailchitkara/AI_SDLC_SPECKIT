@@ -17,7 +17,7 @@ OWNER="${GITHUB_REPOSITORY%%/*}"
 REPO="${GITHUB_REPOSITORY##*/}"
 HEAD_SHA="$(jq -r '.pull_request.head.sha // empty' "$GITHUB_EVENT_PATH")"
 PR_NUMBER="$(jq -r '.pull_request.number // .number // empty' "$GITHUB_EVENT_PATH")"
-CHECK_NAME="AgentGuard PR Risk Gate"
+CHECK_NAME="${CHECK_NAME:-AgentGuard PR Risk Gate}"
 
 if [ -z "$HEAD_SHA" ]; then
   echo "::warning::No head SHA available (not a pull_request event) — skipping result publication." >&2

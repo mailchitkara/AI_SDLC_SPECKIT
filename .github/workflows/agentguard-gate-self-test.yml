@@ -52,12 +52,19 @@ jobs:
           [ "${{ steps.run1.outputs.recommendation }}" = "${{ steps.run2.outputs.recommendation }}" ] || { echo "::error::recommendation differs between runs"; exit 1; }
 
       # quickstart.md Scenario 4 / FR-009: fail-open by default when analysis is unavailable.
+      #
+      # check-name is overridden here (and below) so this deliberately-broken smoke test doesn't
+      # publish to the same "AgentGuard PR Risk Gate" check that run1/run2 just published a real
+      # result to — publish-result.sh updates in place by name+SHA (FR-007), so without this
+      # override, this step's fake "unavailable" result would overwrite the real analysis on this
+      # very PR. (Discovered live: it did, on this PR's first self-test run.)
       - name: Run gate against an unreachable API (default fail-open)
         id: unreachable-default
         continue-on-error: true
         uses: ./.github/actions/agentguard-pr-gate
         with:
           api-url: https://agentguard-api-does-not-exist.invalid
+          check-name: 'AgentGuard PR Risk Gate (self-test: unreachable-default)'
 
       - name: Assert fail-open succeeded with status=unavailable
         run: |
@@ -76,6 +83,7 @@ jobs:
         with:
           api-url: https://agentguard-api-does-not-exist.invalid
           fail-on-unavailable: 'true'
+          check-name: 'AgentGuard PR Risk Gate (self-test: unreachable-failclosed)'
 
       - name: Assert fail-closed failed the step
         run: |

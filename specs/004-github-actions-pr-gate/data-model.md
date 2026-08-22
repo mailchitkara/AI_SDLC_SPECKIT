@@ -13,6 +13,7 @@ The action's own configuration, supplied entirely as `action.yml` inputs on the 
 | `timeout-seconds` | integer | `60` | Analysis call budget — see `research.md` §3. |
 | `api-url` | string | *(required, no default)* | Base URL of the AgentGuard.Api instance exposing the `003` analyze-by-reference endpoint. Required rather than defaulted, since a consuming repository may run its own AgentGuard deployment rather than a shared one. |
 | `github-token` | string | `${{ github.token }}` | Ambient credential passed through to the analyze call and used to publish the Check Run / fallback comment. |
+| `check-name` | string | `AgentGuard PR Risk Gate` | Name of the Published Result's Check Run — see `contracts/action-interface.md` for why this exists (discovered live: without it, multiple invocations against the same PR/SHA overwrite each other's real result, per the update-in-place behavior in FR-007). |
 
 ## Gate Outcome
 

@@ -41,6 +41,7 @@ That's the whole integration — the action reads the triggering PR from the wor
 | `block-on` | no | `CRITICAL` | Comma-separated classifications that fail the step, e.g. `HIGH,CRITICAL`. |
 | `fail-on-unavailable` | no | `false` | `true` fails the step when analysis itself can't complete, instead of warning and succeeding (fail-open default — see below). |
 | `timeout-seconds` | no | `60` | How long to wait for the analysis call. |
+| `check-name` | no | `AgentGuard PR Risk Gate` | Only override this if you invoke the action more than once against the same PR in one workflow (e.g. testing several configurations) — otherwise later calls silently overwrite earlier ones' published result. Leave it at the default for normal single-invocation gating. |
 
 Full reference: [contracts/action-interface.md](../specs/004-github-actions-pr-gate/contracts/action-interface.md).
 
