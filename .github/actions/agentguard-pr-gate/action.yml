@@ -1,0 +1,94 @@
+name: 'AgentGuard PR Risk Gate'
+description: 'Analyzes the pull request a workflow is running on via AgentGuard and gates it on a configurable risk policy.'
+
+inputs:
+  api-url:
+    description: 'Base URL of the AgentGuard.Api instance (e.g. https://agentguard-api-ifb3.onrender.com).'
+    required: true
+  github-token:
+    description: 'Token used both as the GitHub credential AgentGuard fetches the PR with, and to publish the result on the PR.'
+    required: false
+    default: ${{ github.token }}
+  block-on:
+    description: 'Comma-separated risk classifications that fail the step (LOW, MEDIUM, HIGH, CRITICAL).'
+    required: false
+    default: 'CRITICAL'
+  fail-on-unavailable:
+    description: 'Fail the step when analysis itself cannot complete, instead of warning and succeeding (fail-closed vs. the fail-open default).'
+    required: false
+    default: 'false'
+  timeout-seconds:
+    description: 'How long to wait for the AgentGuard analysis call before treating it as unavailable.'
+    required: false
+    default: '60'
+  check-name:
+    description: 'Name of the Check Run this publishes. Override only for testing multiple configurations against the same PR in one workflow (e.g. a self-test) — each name is updated independently, so the default should stay untouched for real gating usage, since branch protection references it by name.'
+    required: false
+    default: 'AgentGuard PR Risk Gate'
+
+outputs:
+  status:
+    description: '"completed" or "unavailable".'
+    value: ${{ steps.set-outputs.outputs.status }}
+  score:
+    description: 'Risk score 0-100 (present when status is "completed").'
+    value: ${{ steps.set-outputs.outputs.score }}
+  classification:
+    description: 'LOW | MEDIUM | HIGH | CRITICAL (present when status is "completed").'
+    value: ${{ steps.set-outputs.outputs.classification }}
+  recommendation:
+    description: 'SAFE_TO_REVIEW | REVIEW_RECOMMENDED | HUMAN_REVIEW_REQUIRED | BLOCK_MERGE (present when status is "completed").'
+    value: ${{ steps.set-outputs.outputs.recommendation }}
+  pass:
+    description: 'Whether the Gate Policy allows this PR to proceed, independent of the step''s own exit code.'
+    value: ${{ steps.apply-policy.outputs.pass }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Analyze PR
+      id: analyze
+      shell: bash
+      env:
+        API_URL: ${{ inputs.api-url }}
+        GITHUB_TOKEN_INPUT: ${{ inputs.github-token }}
+        TIMEOUT_SECONDS: ${{ inputs.timeout-seconds }}
+      run: bash "${{ github.action_path }}/scripts/analyze.sh"
+
+    - name: Set analysis outputs
+      id: set-outputs
+      shell: bash
+      run: |
+        source "${{ github.action_path }}/scripts/lib.sh"
+        STATUS="$(outcome_field '.status')"
+        echo "status=$STATUS" >> "$GITHUB_OUTPUT"
+        if [ "$STATUS" = "completed" ]; then
+          echo "score=$(outcome_field '.score')" >> "$GITHUB_OUTPUT"
+          echo "classification=$(outcome_field '.classification')" >> "$GITHUB_OUTPUT"
+          echo "recommendation=$(outcome_field '.recommendation')" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Apply Gate Policy
+      id: apply-policy
+      shell: bash
+      env:
+        BLOCK_ON: ${{ inputs.block-on }}
+        FAIL_ON_UNAVAILABLE: ${{ inputs.fail-on-unavailable }}
+      run: bash "${{ github.action_path }}/scripts/apply-policy.sh"
+
+    - name: Publish result on the PR
+      shell: bash
+      env:
+        GITHUB_TOKEN_INPUT: ${{ inputs.github-token }}
+        CHECK_NAME: ${{ inputs.check-name }}
+      run: bash "${{ github.action_path }}/scripts/publish-result.sh"
+
+    # Publishing (above) always runs before this resolves the step's exit code, per
+    # contracts/action-interface.md, so a failed publish never suppresses the pass/fail decision.
+    - name: Resolve step outcome
+      shell: bash
+      run: |
+        if [ "${{ steps.apply-policy.outputs.pass }}" != "true" ]; then
+          echo "::error::AgentGuard Gate Policy blocked this PR (see the AgentGuard PR Risk Gate check for details)."
+          exit 1
+        fi
