@@ -16,12 +16,17 @@ curl -s -X POST http://localhost:5080/api/pr-risk-analysis \
 
 ## Scenario 2 — a finding now carries dimension/confidence/kind (US1)
 
+Submit a change containing a string matching AWS's access-key-ID shape (the literal prefix `AKIA`
+followed by 16 uppercase letters/digits — deliberately not written out in full here, since an
+actual matching example would itself trip `SECRET_DETECTED` on this document, which is exactly
+what happened the first time this quickstart shipped):
+
 ```bash
 curl -s -X POST http://localhost:5080/api/pr-risk-analysis \
   -H "Content-Type: application/json" \
   -d '{
     "repositoryName":"agentguard-demo","prNumber":7,"prTitle":"Add debug logging",
-    "changedFiles":[{"path":"src/config/aws.ts","changeType":"ADDED","newContent":"const key = '"'"'AKIAABCDEFGHIJKLMNOP'"'"';","linesAdded":1,"linesDeleted":0}]
+    "changedFiles":[{"path":"src/config/aws.ts","changeType":"ADDED","newContent":"const key = <AKIA-shaped fixture>;","linesAdded":1,"linesDeleted":0}]
   }'
 ```
 
