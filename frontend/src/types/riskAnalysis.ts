@@ -51,6 +51,11 @@ export type Recommendation =
   | 'HUMAN_REVIEW_REQUIRED'
   | 'BLOCK_MERGE'
 
+export interface PartiallyEvaluatedFile {
+  path: string
+  reason: string
+}
+
 export interface RiskAnalysisResult {
   repositoryName: string
   prNumber: number
@@ -60,9 +65,28 @@ export interface RiskAnalysisResult {
   recommendation: Recommendation
   checks: CheckResult[]
   findings: Finding[]
+  partiallyEvaluatedFiles?: PartiallyEvaluatedFile[]
 }
 
 export interface ValidationError {
   message: string
   errors: string[]
+}
+
+// Mirrors specs/003-github-pr-import/contracts/pr-reference-analysis-endpoint.md
+
+export interface PrReferenceRequest {
+  prUrl?: string
+  owner?: string
+  repository?: string
+  prNumber?: number
+  credential?: string
+}
+
+export type ImportErrorType = 'invalid_reference' | 'not_found_or_no_access' | 'rate_limited'
+
+export interface ImportError {
+  errorType: ImportErrorType
+  message: string
+  retryableWithCredential: boolean
 }
