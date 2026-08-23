@@ -21,7 +21,12 @@ public static class RuleCatalog
     public static readonly Rule SecretDetected =
         new(new RuleId("SECRET_DETECTED"), "Potential Secret Detected", Severity.Blocker, RiskDimension.Security);
 
-    /// <summary>All five fixed V1 rules, in the fixed order used for CheckResult output (FR-011).</summary>
+    // 006-security-risk-rules: first Phase 2 addition, appended after the original five to
+    // preserve their relative order (data-model.md).
+    public static readonly Rule OverlyPermissiveAccess =
+        new(new RuleId("OVERLY_PERMISSIVE_ACCESS_CONTROL"), "Overly Permissive Access Control", Severity.High, RiskDimension.Security);
+
+    /// <summary>The original five fixed V1 rules, in the fixed order used for CheckResult output (FR-011 from 001-pr-risk-analysis-v1), plus later phases' additions appended after them.</summary>
     public static readonly IReadOnlyList<Rule> All =
     [
         LargeChangeSize,
@@ -29,5 +34,6 @@ public static class RuleCatalog
         ApiContractBreakingChange,
         ArchitectureViolation,
         SecretDetected,
+        OverlyPermissiveAccess,
     ];
 }
