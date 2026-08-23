@@ -59,6 +59,9 @@ public class PrReferenceAnalysisEndpointTests : IClassFixture<WebApplicationFact
         body.Recommendation.Should().Be("SAFE_TO_REVIEW");
         body.PartiallyEvaluatedFiles.Should().BeEmpty();
         fake.Calls.Should().ContainSingle(c => c.Owner == "chalk" && c.Repository == "chalk" && c.PrNumber == 688);
+
+        // 005-risk-engine-foundation US1 (T012): richer result fields present on this endpoint too (FR-015).
+        body.RecommendationForcedByOverride.Should().BeFalse();
     }
 
     [Fact]

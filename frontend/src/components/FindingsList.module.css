@@ -71,6 +71,35 @@
   color: var(--color-text);
 }
 
+.metaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: -0.3rem 0 0.75rem;
+}
+
+.metaBadge {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+
+.overrideBadge {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--color-critical);
+  background: var(--color-critical-bg);
+}
+
 .details {
   margin: 0;
 }

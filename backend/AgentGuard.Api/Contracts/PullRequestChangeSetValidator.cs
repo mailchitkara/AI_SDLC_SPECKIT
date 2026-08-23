@@ -34,6 +34,8 @@ public static class PullRequestChangeSetValidator
             }
         }
 
+        errors.AddRange(ThresholdConfigurationRequestValidator.Validate(request.Thresholds));
+
         return errors;
     }
 

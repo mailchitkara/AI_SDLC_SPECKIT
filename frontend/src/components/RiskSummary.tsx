@@ -39,6 +39,12 @@ export function RiskSummary({ result }: RiskSummaryProps) {
           </p>
         </div>
       </div>
+
+      {result.recommendationForcedByOverride && (
+        <p className={styles.overrideNote} role="note">
+          This recommendation was forced by a mandatory-override finding, independent of the risk score.
+        </p>
+      )}
     </div>
   )
 }

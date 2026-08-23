@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import type { Finding, Severity } from '../types/riskAnalysis'
+import { formatEnumLabel } from '../utils/labels'
 import styles from './FindingsList.module.css'
 
 interface FindingsListProps {
@@ -66,6 +67,20 @@ export function FindingsList({ findings }: FindingsListProps) {
                 </span>
                 <h4 className={styles.ruleName}>{finding.ruleName}</h4>
               </div>
+
+              {(finding.dimension || finding.confidence) && (
+                <div className={styles.metaRow}>
+                  {finding.dimension && (
+                    <span className={styles.metaBadge}>{formatEnumLabel(finding.dimension)}</span>
+                  )}
+                  {finding.confidence && (
+                    <span className={styles.metaBadge}>{formatEnumLabel(finding.confidence)} confidence</span>
+                  )}
+                  {finding.mandatoryOverride && (
+                    <span className={styles.overrideBadge}>Mandatory block</span>
+                  )}
+                </div>
+              )}
 
               <p className={styles.explanation}>{finding.explanation}</p>
 

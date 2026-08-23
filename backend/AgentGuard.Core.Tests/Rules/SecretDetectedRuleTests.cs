@@ -17,7 +17,7 @@ public class SecretDetectedRuleTests
         var findings = SecretDetectedRule.Evaluate(changeSet);
 
         findings.Should().ContainSingle();
-        findings[0].RuleId.Should().Be(RuleId.SecretDetected);
+        findings[0].RuleId.Should().Be(RuleCatalog.SecretDetected.Id);
         findings[0].Severity.Should().Be(AgentGuard.Core.RiskEngine.Severity.Blocker);
     }
 

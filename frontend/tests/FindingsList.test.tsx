@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import type { Finding } from '../src/types/riskAnalysis'
 import { FindingsList } from '../src/components/FindingsList'
 import { multiRuleResult } from './fixtures/riskAnalysisResults'
 
@@ -36,5 +37,27 @@ describe('FindingsList', () => {
 
     expect(screen.getByText('API Contract Breaking Change')).toBeInTheDocument()
     expect(screen.queryByText('Large Change Size')).not.toBeInTheDocument()
+  })
+
+  // 005-risk-engine-foundation US1 (T016)
+  it('renders dimension, confidence, and a mandatory-override badge when present', () => {
+    const finding: Finding = {
+      ...multiRuleResult.findings[0],
+      dimension: 'SECURITY',
+      confidence: 'CERTAIN',
+      mandatoryOverride: true,
+    }
+
+    render(<FindingsList findings={[finding]} />)
+
+    expect(screen.getByText('SECURITY')).toBeInTheDocument()
+    expect(screen.getByText('CERTAIN confidence')).toBeInTheDocument()
+    expect(screen.getByText('Mandatory block')).toBeInTheDocument()
+  })
+
+  it('omits dimension/confidence badges when the finding has none (pre-feature shape)', () => {
+    render(<FindingsList findings={multiRuleResult.findings} />)
+
+    expect(screen.queryByText('Mandatory block')).not.toBeInTheDocument()
   })
 })

@@ -28,7 +28,7 @@ public class ArchitectureViolationRuleTests
         var findings = ArchitectureViolationRule.Evaluate(changeSet, config);
 
         findings.Should().ContainSingle();
-        findings[0].RuleId.Should().Be(RuleId.ArchitectureViolation);
+        findings[0].RuleId.Should().Be(RuleCatalog.ArchitectureViolation.Id);
         findings[0].Severity.Should().Be(AgentGuard.Core.RiskEngine.Severity.High);
         findings[0].Location.Should().Be("src/Ui/Component.cs");
     }

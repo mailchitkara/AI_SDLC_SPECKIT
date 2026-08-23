@@ -70,6 +70,92 @@ public class PrRiskAnalysisEndpointTests : IClassFixture<WebApplicationFactory<P
 
         var rawResponseText = await response.Content.ReadAsStringAsync();
         rawResponseText.Should().NotContain("AKIAABCDEFGHIJKLMNOP");
+
+        // 005-risk-engine-foundation US1 (T012): richer finding fields, regression-safe (FR-013).
+        var secretFinding = body.Findings.Should().ContainSingle(f => f.RuleId == "SECRET_DETECTED").Subject;
+        secretFinding.Dimension.Should().Be("SECURITY");
+        secretFinding.Confidence.Should().Be("CERTAIN");
+        secretFinding.Kind.Should().Be("DETERMINISTIC");
+        secretFinding.MandatoryOverride.Should().BeFalse();
+        // Reaches BLOCK_MERGE via score (BLOCKER weight), not a mandatory override (research.md §3).
+        body.RecommendationForcedByOverride.Should().BeFalse();
+    }
+
+    // 005-risk-engine-foundation US2 (T018): configurable thresholds.
+
+    [Fact]
+    public async Task Custom_thresholds_reclassify_a_score_that_the_defaults_would_classify_differently()
+    {
+        var changedFiles = new List<ChangedFileRequest>
+        {
+            new()
+            {
+                Path = "src/pricing/PricingEngine.cs",
+                ChangeType = "MODIFIED",
+                OldContent = "x",
+                NewContent = "y",
+                LinesAdded = 300,
+                LinesDeleted = 250,
+            },
+        };
+        var baseRequest = new PullRequestChangeSetRequest
+        {
+            RepositoryName = "agentguard-demo",
+            PrNumber = 42,
+            PrTitle = "Refactor pricing engine",
+            ChangedFiles = changedFiles,
+        };
+
+        var defaultResponse = await _client.PostAsJsonAsync("/api/pr-risk-analysis", baseRequest);
+        var defaultBody = await defaultResponse.Content.ReadFromJsonAsync<RiskAnalysisResultResponse>();
+
+        var customRequest = baseRequest with
+        {
+            Thresholds = new ThresholdConfigurationRequest { LowMax = 5, MediumMax = 10, HighMax = 74 },
+        };
+        var customResponse = await _client.PostAsJsonAsync("/api/pr-risk-analysis", customRequest);
+        var customBody = await customResponse.Content.ReadFromJsonAsync<RiskAnalysisResultResponse>();
+
+        customResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        customBody!.Score.Should().Be(defaultBody!.Score); // score arithmetic unchanged (FR-009)
+        customBody.Classification.Should().NotBe(defaultBody.Classification); // but banding differs
+    }
+
+    [Theory]
+    [InlineData(50, 20, 74)] // out of order
+    [InlineData(-1, 20, 74)] // negative
+    [InlineData(0, 20, 150)] // >= 100
+    public async Task Invalid_thresholds_return_400(int lowMax, int mediumMax, int highMax)
+    {
+        var request = new PullRequestChangeSetRequest
+        {
+            RepositoryName = "agentguard-demo",
+            PrNumber = 1,
+            PrTitle = "t",
+            ChangedFiles = [],
+            Thresholds = new ThresholdConfigurationRequest { LowMax = lowMax, MediumMax = mediumMax, HighMax = highMax },
+        };
+
+        var response = await _client.PostAsJsonAsync("/api/pr-risk-analysis", request);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task Partial_thresholds_return_400()
+    {
+        var request = new PullRequestChangeSetRequest
+        {
+            RepositoryName = "agentguard-demo",
+            PrNumber = 1,
+            PrTitle = "t",
+            ChangedFiles = [],
+            Thresholds = new ThresholdConfigurationRequest { LowMax = 24, MediumMax = 49 }, // HighMax missing
+        };
+
+        var response = await _client.PostAsJsonAsync("/api/pr-risk-analysis", request);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact]

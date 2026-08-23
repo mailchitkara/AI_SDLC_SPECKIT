@@ -19,7 +19,7 @@ public class ApiContractBreakingChangeRuleTests
         var findings = Evaluate(oldContract, newContract);
 
         findings.Should().ContainSingle();
-        findings[0].RuleId.Should().Be(RuleId.ApiContractBreakingChange);
+        findings[0].RuleId.Should().Be(RuleCatalog.ApiContractBreakingChange.Id);
         findings[0].Severity.Should().Be(AgentGuard.Core.RiskEngine.Severity.High);
         findings[0].Explanation.Should().Contain("removed");
     }

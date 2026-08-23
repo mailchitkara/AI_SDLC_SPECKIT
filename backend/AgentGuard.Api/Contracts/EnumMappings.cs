@@ -1,4 +1,5 @@
 using AgentGuard.Core;
+using AgentGuard.Core.Findings;
 using AgentGuard.Core.Rules;
 using AgentGuard.Core.RiskEngine;
 
@@ -23,15 +24,9 @@ public static class EnumMappings
         }
     }
 
-    public static string ToApiString(this RuleId ruleId) => ruleId switch
-    {
-        RuleId.LargeChangeSize => "LARGE_CHANGE_SIZE",
-        RuleId.MissingRelatedTests => "MISSING_RELATED_TESTS",
-        RuleId.ApiContractBreakingChange => "API_CONTRACT_BREAKING_CHANGE",
-        RuleId.ArchitectureViolation => "ARCHITECTURE_VIOLATION",
-        RuleId.SecretDetected => "SECRET_DETECTED",
-        _ => throw new ArgumentOutOfRangeException(nameof(ruleId), ruleId, "Unknown rule id."),
-    };
+    // RuleId is now a stable string-backed identity (005-risk-engine-foundation FR-001) — the API
+    // string *is* the identity, so this is a passthrough rather than a switch over a closed enum.
+    public static string ToApiString(this RuleId ruleId) => ruleId.Value;
 
     public static string ToApiString(this Severity severity) => severity switch
     {
@@ -59,5 +54,34 @@ public static class EnumMappings
         Recommendation.HumanReviewRequired => "HUMAN_REVIEW_REQUIRED",
         Recommendation.BlockMerge => "BLOCK_MERGE",
         _ => throw new ArgumentOutOfRangeException(nameof(recommendation), recommendation, "Unknown recommendation."),
+    };
+
+    public static string ToApiString(this RiskDimension dimension) => dimension switch
+    {
+        RiskDimension.Security => "SECURITY",
+        RiskDimension.Testing => "TESTING",
+        RiskDimension.Compatibility => "COMPATIBILITY",
+        RiskDimension.Architecture => "ARCHITECTURE",
+        RiskDimension.ChangeManagement => "CHANGE_MANAGEMENT",
+        RiskDimension.Dependencies => "DEPENDENCIES",
+        RiskDimension.Reliability => "RELIABILITY",
+        RiskDimension.Configuration => "CONFIGURATION",
+        _ => throw new ArgumentOutOfRangeException(nameof(dimension), dimension, "Unknown risk dimension."),
+    };
+
+    public static string ToApiString(this Confidence confidence) => confidence switch
+    {
+        Confidence.Certain => "CERTAIN",
+        Confidence.High => "HIGH",
+        Confidence.Medium => "MEDIUM",
+        Confidence.Low => "LOW",
+        _ => throw new ArgumentOutOfRangeException(nameof(confidence), confidence, "Unknown confidence."),
+    };
+
+    public static string ToApiString(this FindingKind kind) => kind switch
+    {
+        FindingKind.Deterministic => "DETERMINISTIC",
+        FindingKind.Contextual => "CONTEXTUAL",
+        _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "Unknown finding kind."),
     };
 }

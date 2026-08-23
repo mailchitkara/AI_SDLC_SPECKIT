@@ -22,4 +22,17 @@ describe('RiskSummary', () => {
     expect(screen.getByText('CRITICAL')).toBeInTheDocument()
     expect(screen.getByText('BLOCK MERGE')).toBeInTheDocument()
   })
+
+  // 005-risk-engine-foundation US3 (T027)
+  it('shows the mandatory-override note when recommendationForcedByOverride is true', () => {
+    render(<RiskSummary result={{ ...blockerResult, recommendationForcedByOverride: true }} />)
+
+    expect(screen.getByRole('note')).toHaveTextContent(/mandatory-override finding/i)
+  })
+
+  it('omits the mandatory-override note otherwise', () => {
+    render(<RiskSummary result={cleanResult} />)
+
+    expect(screen.queryByRole('note')).not.toBeInTheDocument()
+  })
 })

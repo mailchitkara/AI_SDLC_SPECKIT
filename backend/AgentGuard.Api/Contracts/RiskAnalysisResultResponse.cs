@@ -10,7 +10,11 @@ public sealed record FindingResponse(
     string Explanation,
     string Evidence,
     string? Location,
-    string Remediation);
+    string Remediation,
+    string Dimension,
+    string Confidence,
+    string Kind,
+    bool MandatoryOverride);
 
 public sealed record CheckResultResponse(string RuleId, string RuleName, bool Passed);
 
@@ -24,6 +28,7 @@ public sealed record RiskAnalysisResultResponse(
     int Score,
     string Classification,
     string Recommendation,
+    bool RecommendationForcedByOverride,
     IReadOnlyList<CheckResultResponse> Checks,
     IReadOnlyList<FindingResponse> Findings,
     IReadOnlyList<PartiallyEvaluatedFileResponse> PartiallyEvaluatedFiles);
@@ -41,6 +46,7 @@ public static class RiskAnalysisResultResponseMapping
         Score: result.Score,
         Classification: result.Classification.ToApiString(),
         Recommendation: result.Recommendation.ToApiString(),
+        RecommendationForcedByOverride: result.RecommendationForcedByOverride,
         Checks: result.Checks.Select(c => new CheckResultResponse(c.RuleId.ToApiString(), c.RuleName, c.Passed)).ToList(),
         Findings: result.Findings.Select(f => new FindingResponse(
                 f.RuleId.ToApiString(),
@@ -49,7 +55,11 @@ public static class RiskAnalysisResultResponseMapping
                 f.Explanation,
                 f.Evidence,
                 f.Location,
-                f.Remediation))
+                f.Remediation,
+                f.Dimension.ToApiString(),
+                f.Confidence.ToApiString(),
+                f.Kind.ToApiString(),
+                f.MandatoryOverride))
             .ToList(),
         PartiallyEvaluatedFiles: partiallyEvaluatedFiles ?? []);
 }

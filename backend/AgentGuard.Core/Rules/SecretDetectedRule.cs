@@ -1,4 +1,5 @@
 using AgentGuard.Core.Findings;
+using AgentGuard.Core.RiskEngine;
 
 namespace AgentGuard.Core.Rules;
 
@@ -6,6 +7,10 @@ namespace AgentGuard.Core.Rules;
 /// FR-007 + FR-010: flags newly-introduced content matching a recognized secret pattern.
 /// Findings are constructed only from the already-masked value — the raw match is never
 /// held past this point, so it can never leak into a Finding, response, UI, or log.
+///
+/// MandatoryOverride is intentionally left false here — this rule already reaches BLOCK_MERGE
+/// via its BLOCKER severity weight alone, so setting it too would be redundant and would muddy
+/// what MandatoryOverride actually signals to a consumer (005-risk-engine-foundation research.md §3).
 /// </summary>
 public static class SecretDetectedRule
 {
@@ -24,7 +29,10 @@ public static class SecretDetectedRule
                     Explanation: "Changed content matches a recognized secret pattern.",
                     Evidence: EvidenceMasking.Mask(rawSecret),
                     Location: file.Path,
-                    Remediation: "Remove the secret from source control and rotate the credential immediately."));
+                    Remediation: "Remove the secret from source control and rotate the credential immediately.",
+                    Dimension: RuleCatalog.SecretDetected.DefaultDimension,
+                    Confidence: Confidence.Certain,
+                    Kind: FindingKind.Deterministic));
             }
         }
 

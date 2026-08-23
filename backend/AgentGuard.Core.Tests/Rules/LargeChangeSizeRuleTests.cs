@@ -29,7 +29,7 @@ public class LargeChangeSizeRuleTests
         var findings = LargeChangeSizeRule.Evaluate(changeSet);
 
         findings.Should().ContainSingle();
-        findings[0].RuleId.Should().Be(RuleId.LargeChangeSize);
+        findings[0].RuleId.Should().Be(RuleCatalog.LargeChangeSize.Id);
         findings[0].Severity.Should().Be(AgentGuard.Core.RiskEngine.Severity.Low);
     }
 
