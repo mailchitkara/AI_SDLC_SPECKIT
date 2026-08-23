@@ -1,8 +1,16 @@
 .findings {
-  border: 1px solid #3a3a3a;
-  border-radius: 8px;
-  padding: 1.25rem 1.5rem;
-  margin-bottom: 1.5rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.findings h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
 }
 
 .toolbar {
@@ -11,11 +19,22 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
 }
 
 .toolbar label {
   margin-right: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.toolbar select {
+  font-family: inherit;
+  font-size: 0.85rem;
+  color: var(--color-text);
+  background-color: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.35em 0.6em;
 }
 
 .list {
@@ -28,25 +47,28 @@
 }
 
 .card {
-  border: 1px solid #3a3a3a;
-  border-radius: 6px;
-  padding: 0.9rem 1rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+  border-radius: var(--radius-sm);
+  padding: 1rem 1.1rem;
 }
 
 .cardHeader {
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.5rem;
 }
 
 .ruleName {
   margin: 0;
   font-size: 1rem;
+  font-weight: 700;
 }
 
 .explanation {
-  margin: 0 0 0.6rem;
+  margin: 0 0 0.75rem;
+  color: var(--color-text);
 }
 
 .details {
@@ -54,47 +76,52 @@
 }
 
 .details dt {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  opacity: 0.7;
-  margin-top: 0.5rem;
+  color: var(--color-text-muted);
+  margin-top: 0.6rem;
 }
 
 .details dd {
-  margin: 0.1rem 0 0;
+  margin: 0.15rem 0 0;
+}
+
+.details dd:has(+ dt) {
+  margin-bottom: 0;
 }
 
 .severityBadge {
   display: inline-block;
-  padding: 0.1rem 0.55rem;
-  border-radius: 999px;
-  font-size: 0.75rem;
+  padding: 0.15rem 0.6rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.03em;
 }
 
 .severityBLOCKER {
-  background: #d1293d;
-  color: #fff;
+  background: var(--color-critical-bg);
+  color: var(--color-critical);
 }
 
 .severityHIGH {
-  background: #c1440e;
-  color: #fff;
+  background: var(--color-high-bg);
+  color: var(--color-high);
 }
 
 .severityMEDIUM {
-  background: #9a6b00;
-  color: #fff;
+  background: var(--color-medium-bg);
+  color: var(--color-medium);
 }
 
 .severityLOW {
-  background: #1b7f3a;
-  color: #fff;
+  background: var(--color-low-bg);
+  color: var(--color-low);
 }
 
 .severityINFO {
-  background: #55606d;
-  color: #fff;
+  background: var(--color-info-bg);
+  color: var(--color-info);
 }
