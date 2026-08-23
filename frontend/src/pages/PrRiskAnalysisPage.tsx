@@ -9,6 +9,7 @@ import {
 import { RiskSummary } from '../components/RiskSummary'
 import { FindingsList } from '../components/FindingsList'
 import { ChecksSummary } from '../components/ChecksSummary'
+import styles from './PrRiskAnalysisPage.module.css'
 
 type Status = 'idle' | 'loading' | 'error' | 'success'
 type Mode = 'json' | 'github'
@@ -97,84 +98,125 @@ export function PrRiskAnalysisPage() {
   }
 
   return (
-    <main>
-      <h1>AgentGuard — PR Risk Analysis</h1>
-
-      <div role="tablist" aria-label="How to provide PR data">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={mode === 'json'}
-          onClick={() => switchMode('json')}
-        >
-          Paste JSON
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={mode === 'github'}
-          onClick={() => switchMode('github')}
-        >
-          GitHub PR URL
-        </button>
+    <main className={styles.page}>
+      <div className={styles.header}>
+        <span className={styles.logo} aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M12 2 4 5v6c0 5 3.4 8.7 8 10 4.6-1.3 8-5 8-10V5l-8-3Z"
+              fill="currentColor"
+              opacity="0.9"
+            />
+            <path
+              d="m9 12 2 2 4-4"
+              stroke="var(--color-surface)"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </span>
+        <h1 className={styles.title}>AgentGuard</h1>
       </div>
+      <p className={styles.tagline}>Deterministic pull request risk analysis.</p>
 
-      {mode === 'json' && (
-        <>
-          <label htmlFor="pr-change-data">Pull request change data (JSON)</label>
-          <textarea
-            id="pr-change-data"
-            value={inputText}
-            onChange={(event) => setInputText(event.target.value)}
-            rows={12}
-          />
-          <button type="button" onClick={handleAnalyzeJson} disabled={status === 'loading'}>
-            {status === 'loading' ? 'Analyzing…' : 'Analyze'}
-          </button>
-        </>
-      )}
-
-      {mode === 'github' && (
-        <>
-          <label htmlFor="pr-url">GitHub pull request URL</label>
-          <input
-            id="pr-url"
-            type="text"
-            value={prUrl}
-            onChange={(event) => setPrUrl(event.target.value)}
-            placeholder="https://github.com/{owner}/{repo}/pull/{number}"
-          />
-
-          <label htmlFor="pr-credential">
-            GitHub credential (optional — required for private repos, or to raise the rate limit)
-          </label>
-          <input
-            id="pr-credential"
-            type="password"
-            value={credential}
-            onChange={(event) => setCredential(event.target.value)}
-            placeholder="ghp_…"
-          />
-
+      <div className={styles.card}>
+        <div className={styles.tabs} role="tablist" aria-label="How to provide PR data">
           <button
             type="button"
-            onClick={handleAnalyzeGitHub}
-            disabled={status === 'loading' || prUrl.trim() === ''}
+            role="tab"
+            aria-selected={mode === 'json'}
+            className={`${styles.tab} ${mode === 'json' ? styles.tabActive : ''}`}
+            onClick={() => switchMode('json')}
           >
-            {status === 'loading' ? 'Analyzing…' : 'Analyze'}
+            Paste JSON
           </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={mode === 'github'}
+            className={`${styles.tab} ${mode === 'github' ? styles.tabActive : ''}`}
+            onClick={() => switchMode('github')}
+          >
+            GitHub PR URL
+          </button>
+        </div>
 
-          {retryableWithCredential && (
-            <p role="note">
-              This PR could not be found without a credential — it may be private. Enter a GitHub
-              token above with access to it, then try again.
-            </p>
-          )}
-        </>
-      )}
+        {mode === 'json' && (
+          <>
+            <div className={styles.field}>
+              <label htmlFor="pr-change-data">Pull request change data (JSON)</label>
+              <textarea
+                id="pr-change-data"
+                className={styles.textarea}
+                value={inputText}
+                onChange={(event) => setInputText(event.target.value)}
+                rows={12}
+              />
+            </div>
+            <div className={styles.actions}>
+              <button
+                type="button"
+                className={styles.primaryButton}
+                onClick={handleAnalyzeJson}
+                disabled={status === 'loading'}
+              >
+                {status === 'loading' ? 'Analyzing…' : 'Analyze'}
+              </button>
+            </div>
+          </>
+        )}
+
+        {mode === 'github' && (
+          <>
+            <div className={styles.field}>
+              <label htmlFor="pr-url">GitHub pull request URL</label>
+              <input
+                id="pr-url"
+                type="text"
+                value={prUrl}
+                onChange={(event) => setPrUrl(event.target.value)}
+                placeholder="https://github.com/{owner}/{repo}/pull/{number}"
+              />
+            </div>
+
+            <div className={styles.field}>
+              <label htmlFor="pr-credential">
+                GitHub credential{' '}
+                <span className={styles.hint}>(optional — required for private repos, or to raise the rate limit)</span>
+              </label>
+              <input
+                id="pr-credential"
+                type="password"
+                value={credential}
+                onChange={(event) => setCredential(event.target.value)}
+                placeholder="ghp_…"
+              />
+            </div>
+
+            <div className={styles.actions}>
+              <button
+                type="button"
+                className={styles.primaryButton}
+                onClick={handleAnalyzeGitHub}
+                disabled={status === 'loading' || prUrl.trim() === ''}
+              >
+                {status === 'loading' ? 'Analyzing…' : 'Analyze'}
+              </button>
+            </div>
+
+            {retryableWithCredential && (
+              <p className={styles.note} role="note">
+                This PR could not be found without a credential — it may be private. Enter a
+                GitHub token above with access to it, then try again.
+              </p>
+            )}
+          </>
+        )}
+      </div>
 
       {status === 'error' && errorMessage && (
-        <p role="alert" data-testid="analysis-error">
+        <p className={styles.error} role="alert" data-testid="analysis-error">
           {errorMessage}
         </p>
       )}
@@ -184,10 +226,9 @@ export function PrRiskAnalysisPage() {
           <RiskSummary result={result} />
           <ChecksSummary checks={result.checks} />
           {result.partiallyEvaluatedFiles && result.partiallyEvaluatedFiles.length > 0 && (
-            <p role="note" data-testid="partially-evaluated-files">
+            <p className={styles.note} role="note" data-testid="partially-evaluated-files">
               {result.partiallyEvaluatedFiles.length} file(s) could not be fully evaluated (binary
-              or too large):{' '}
-              {result.partiallyEvaluatedFiles.map((f) => f.path).join(', ')}
+              or too large): {result.partiallyEvaluatedFiles.map((f) => f.path).join(', ')}
             </p>
           )}
           <FindingsList findings={result.findings} />
