@@ -27,6 +27,22 @@ export type RuleId =
   | 'ARCHITECTURE_VIOLATION'
   | 'SECRET_DETECTED'
 
+// 005-risk-engine-foundation: optional (not required) so existing fixtures/tests built against
+// the pre-feature shape keep compiling — the API always sends these, but the type doesn't force it.
+export type RiskDimension =
+  | 'SECURITY'
+  | 'TESTING'
+  | 'COMPATIBILITY'
+  | 'ARCHITECTURE'
+  | 'CHANGE_MANAGEMENT'
+  | 'DEPENDENCIES'
+  | 'RELIABILITY'
+  | 'CONFIGURATION'
+
+export type Confidence = 'CERTAIN' | 'HIGH' | 'MEDIUM' | 'LOW'
+
+export type FindingKind = 'DETERMINISTIC' | 'CONTEXTUAL'
+
 export interface Finding {
   ruleId: RuleId
   ruleName: string
@@ -35,6 +51,10 @@ export interface Finding {
   evidence: string
   location?: string | null
   remediation: string
+  dimension?: RiskDimension
+  confidence?: Confidence
+  kind?: FindingKind
+  mandatoryOverride?: boolean
 }
 
 export interface CheckResult {
@@ -63,6 +83,7 @@ export interface RiskAnalysisResult {
   score: number
   classification: RiskClassification
   recommendation: Recommendation
+  recommendationForcedByOverride?: boolean
   checks: CheckResult[]
   findings: Finding[]
   partiallyEvaluatedFiles?: PartiallyEvaluatedFile[]

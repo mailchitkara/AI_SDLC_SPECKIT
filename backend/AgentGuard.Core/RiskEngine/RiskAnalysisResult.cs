@@ -25,5 +25,6 @@ public sealed record RiskAnalysisResult(
     int Score,
     RiskClassification Classification,
     Recommendation Recommendation,
+    bool RecommendationForcedByOverride,
     IReadOnlyList<CheckResult> Checks,
     IReadOnlyList<Finding> Findings);

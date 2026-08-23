@@ -1,4 +1,5 @@
 using AgentGuard.Core.Findings;
+using AgentGuard.Core.RiskEngine;
 
 namespace AgentGuard.Core.Rules;
 
@@ -29,7 +30,10 @@ public static class LargeChangeSizeRule
                     $"thresholds of {MaxLines} lines or {MaxFiles} files.",
                 Evidence: $"{totalLines} lines changed across {fileCount} files",
                 Location: null,
-                Remediation: "Consider splitting this PR into smaller, focused changes."),
+                Remediation: "Consider splitting this PR into smaller, focused changes.",
+                Dimension: RuleCatalog.LargeChangeSize.DefaultDimension,
+                Confidence: Confidence.Certain,
+                Kind: FindingKind.Deterministic),
         ];
     }
 }

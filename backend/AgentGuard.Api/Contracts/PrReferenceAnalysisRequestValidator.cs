@@ -39,6 +39,8 @@ public static partial class PrReferenceAnalysisRequestValidator
             errors.Add("prUrl must be a valid GitHub pull request URL, e.g. https://github.com/{owner}/{repo}/pull/{number}.");
         }
 
+        errors.AddRange(ThresholdConfigurationRequestValidator.Validate(request.Thresholds));
+
         return errors;
     }
 

@@ -15,7 +15,7 @@ public class MissingRelatedTestsRuleTests
         var findings = MissingRelatedTestsRule.Evaluate(changeSet);
 
         findings.Should().ContainSingle();
-        findings[0].RuleId.Should().Be(RuleId.MissingRelatedTests);
+        findings[0].RuleId.Should().Be(RuleCatalog.MissingRelatedTests.Id);
         findings[0].Severity.Should().Be(AgentGuard.Core.RiskEngine.Severity.Medium);
     }
 

@@ -16,7 +16,7 @@ public static class PrRiskAnalysisEndpoint
                     new ValidationErrorResponse("The submitted change data is invalid.", errors));
             }
 
-            var result = analyzer.Analyze(request.ToChangeSet());
+            var result = analyzer.Analyze(request.ToChangeSet(), request.Thresholds?.ToThresholdConfiguration());
             return Results.Ok(result.ToResponse());
         })
         .WithName("AnalyzePullRequest")

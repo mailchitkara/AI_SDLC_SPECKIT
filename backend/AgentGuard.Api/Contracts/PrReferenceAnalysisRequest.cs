@@ -7,4 +7,5 @@ public sealed record PrReferenceAnalysisRequest
     public string? Repository { get; init; }
     public int? PrNumber { get; init; }
     public string? Credential { get; init; }
+    public ThresholdConfigurationRequest? Thresholds { get; init; }
 }

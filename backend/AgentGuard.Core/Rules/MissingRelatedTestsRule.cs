@@ -1,4 +1,5 @@
 using AgentGuard.Core.Findings;
+using AgentGuard.Core.RiskEngine;
 
 namespace AgentGuard.Core.Rules;
 
@@ -31,7 +32,10 @@ public static class MissingRelatedTestsRule
                     $"{sourceFiles.Count} source/business-logic file(s) changed but no recognized test file changed in this PR.",
                 Evidence: $"Changed source files: {string.Join(", ", sourceFiles.Select(f => f.Path))}",
                 Location: null,
-                Remediation: "Add or update tests covering the changed source files."),
+                Remediation: "Add or update tests covering the changed source files.",
+                Dimension: RuleCatalog.MissingRelatedTests.DefaultDimension,
+                Confidence: Confidence.Certain,
+                Kind: FindingKind.Deterministic),
         ];
     }
 }

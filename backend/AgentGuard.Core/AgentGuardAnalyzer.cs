@@ -17,7 +17,7 @@ public sealed class AgentGuardAnalyzer
         _forbiddenDependencyConfig = forbiddenDependencyConfig ?? ForbiddenDependencyConfig.Empty;
     }
 
-    public RiskEngine.RiskAnalysisResult Analyze(PullRequestChangeSet changeSet)
+    public RiskEngine.RiskAnalysisResult Analyze(PullRequestChangeSet changeSet, RiskEngine.ThresholdConfiguration? thresholds = null)
     {
         var findingsByRule = new (Rule Rule, IReadOnlyList<Finding> Findings)[]
         {
@@ -38,7 +38,7 @@ public sealed class AgentGuardAnalyzer
             })
             .ToList();
 
-        var scored = RiskEngine.RiskEngine.Evaluate(allFindings);
+        var scored = RiskEngine.RiskEngine.Evaluate(allFindings, thresholds);
 
         return new RiskEngine.RiskAnalysisResult(
             RepositoryName: changeSet.RepositoryName,
@@ -47,6 +47,7 @@ public sealed class AgentGuardAnalyzer
             Score: scored.Score,
             Classification: scored.Classification,
             Recommendation: scored.Recommendation,
+            RecommendationForcedByOverride: scored.RecommendationForcedByOverride,
             Checks: checks,
             Findings: allFindings);
     }

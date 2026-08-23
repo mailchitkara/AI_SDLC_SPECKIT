@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
 using AgentGuard.Core.Findings;
 using AgentGuard.Core.PolicyEngine;
+using AgentGuard.Core.RiskEngine;
 
 namespace AgentGuard.Core.Rules;
 
@@ -34,7 +35,10 @@ public static partial class ArchitectureViolationRule
                             $"'{import}', which matches the forbidden target pattern '{relationship.To}'.",
                         Evidence: $"{file.Path} -> {import}",
                         Location: file.Path,
-                        Remediation: "Remove this dependency or restructure the code to respect the configured architecture boundary."));
+                        Remediation: "Remove this dependency or restructure the code to respect the configured architecture boundary.",
+                        Dimension: RuleCatalog.ArchitectureViolation.DefaultDimension,
+                        Confidence: Confidence.Certain,
+                        Kind: FindingKind.Deterministic));
                 }
             }
         }

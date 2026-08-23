@@ -1,5 +1,6 @@
 using System.Text.Json;
 using AgentGuard.Core.Findings;
+using AgentGuard.Core.RiskEngine;
 
 namespace AgentGuard.Core.Rules;
 
@@ -137,7 +138,10 @@ public static class ApiContractBreakingChangeRule
         Explanation: explanation,
         Evidence: evidence,
         Location: filePath,
-        Remediation: "Restore the removed capability or introduce a new, explicitly versioned API instead.");
+        Remediation: "Restore the removed capability or introduce a new, explicitly versioned API instead.",
+        Dimension: RuleCatalog.ApiContractBreakingChange.DefaultDimension,
+        Confidence: Confidence.Certain,
+        Kind: FindingKind.Deterministic);
 
     private static IEnumerable<string> RemovedResponseProperties(JsonElement oldOperation, JsonElement newOperation)
     {

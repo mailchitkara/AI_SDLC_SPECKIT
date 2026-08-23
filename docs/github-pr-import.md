@@ -50,6 +50,10 @@ On failure, an `ImportErrorResponse` with the HTTP status doing the signaling:
 | `404` | `not_found_or_no_access` | The PR doesn't exist, **or** it's private and this request can't see it — GitHub itself doesn't distinguish these for an unauthenticated caller, so neither do we | Yes |
 | `429` | `rate_limited` | GitHub's rate limit is exhausted (a `Retry-After` header is included when GitHub supplies one) | No — wait, or add a credential for future requests |
 
+### Richer findings and configurable thresholds (005-risk-engine-foundation)
+
+Both this endpoint and `/api/pr-risk-analysis` also accept an optional `thresholds` request field (`{lowMax, mediumMax, highMax}`, defaulting to V1's fixed 24/49/74 bands) and return each finding with a `dimension`, `confidence`, `kind`, and `mandatoryOverride`, plus a top-level `recommendationForcedByOverride`. See [specs/005-risk-engine-foundation/contracts/risk-analysis-response-extensions.md](../specs/005-risk-engine-foundation/contracts/risk-analysis-response-extensions.md) for the full shape.
+
 ## Local validation
 
 See [specs/003-github-pr-import/quickstart.md](../specs/003-github-pr-import/quickstart.md) for the full set of runnable scenarios (clean PR, secret-tripping PR, invalid/not-found/rate-limited references, credential retry).
