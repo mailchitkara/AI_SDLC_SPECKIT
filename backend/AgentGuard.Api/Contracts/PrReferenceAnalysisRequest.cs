@@ -8,4 +8,5 @@ public sealed record PrReferenceAnalysisRequest
     public int? PrNumber { get; init; }
     public string? Credential { get; init; }
     public ThresholdConfigurationRequest? Thresholds { get; init; }
+    public List<VulnerableDependencyRequest>? VulnerableDependencies { get; init; }
 }

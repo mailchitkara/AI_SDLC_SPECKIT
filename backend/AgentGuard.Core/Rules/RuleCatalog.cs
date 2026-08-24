@@ -51,6 +51,13 @@ public static class RuleCatalog
     public static readonly Rule InsecureConfiguration =
         new(new RuleId("INSECURE_CONFIGURATION_INTRODUCED"), "Insecure Configuration", Severity.High, RiskDimension.Configuration);
 
+    // 012-vulnerable-dependency-adapter: seventh and final Phase 2 addition, appended after
+    // InsecureConfiguration to preserve the existing eleven rules' relative order (data-model.md).
+    // DefaultSeverity is nominal only — actual per-finding severity is computed from each supplied
+    // entry's own external severity (research.md §3), not read from this default.
+    public static readonly Rule VulnerableDependency =
+        new(new RuleId("VULNERABLE_DEPENDENCY_DETECTED"), "Vulnerable Dependency", Severity.High, RiskDimension.Dependencies);
+
     /// <summary>The original five fixed V1 rules, in the fixed order used for CheckResult output (FR-011 from 001-pr-risk-analysis-v1), plus later phases' additions appended after them.</summary>
     public static readonly IReadOnlyList<Rule> All =
     [
@@ -65,5 +72,6 @@ public static class RuleCatalog
         GeneratedFileModified,
         TodoStub,
         InsecureConfiguration,
+        VulnerableDependency,
     ];
 }

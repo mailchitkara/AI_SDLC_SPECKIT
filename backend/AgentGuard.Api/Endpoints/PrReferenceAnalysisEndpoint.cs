@@ -73,7 +73,10 @@ public static class PrReferenceAnalysisEndpoint
                 PrTitle: success.PrTitle,
                 ChangedFiles: changedFiles);
 
-            var analysisResult = analyzer.Analyze(changeSet, request.Thresholds?.ToThresholdConfiguration());
+            var analysisResult = analyzer.Analyze(
+                changeSet,
+                request.Thresholds?.ToThresholdConfiguration(),
+                request.VulnerableDependencies?.Select(d => d.ToVulnerableDependency()).ToList());
 
             var partiallyEvaluatedFiles = success.Files
                 .Where(f => !f.FullyEvaluated)
