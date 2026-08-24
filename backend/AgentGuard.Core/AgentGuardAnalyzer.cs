@@ -42,6 +42,7 @@ public sealed class AgentGuardAnalyzer
             (RuleCatalog.InsecureConfiguration, InsecureConfigurationRule.Evaluate(changeSet)),
             (RuleCatalog.VulnerableDependency, VulnerableDependencyRule.Evaluate(vulnerableDependencies ?? [])),
             (RuleCatalog.BusinessCriticalPath, BusinessCriticalPathRule.Evaluate(changeSet, _businessCriticalPathConfig)),
+            (RuleCatalog.LargeNewFile, LargeNewFileRule.Evaluate(changeSet)),
         };
 
         var allFindings = FindingOrdering.Stable(findingsByRule.SelectMany(rf => rf.Findings));

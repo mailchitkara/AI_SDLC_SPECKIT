@@ -63,6 +63,11 @@ public static class RuleCatalog
     public static readonly Rule BusinessCriticalPath =
         new(new RuleId("BUSINESS_CRITICAL_PATH_TOUCHED"), "Business-Critical Path Touched", Severity.Medium, RiskDimension.BusinessCriticality);
 
+    // 014-large-new-file-detection: second Phase 4 addition, appended after BusinessCriticalPath
+    // to preserve the existing thirteen rules' relative order (data-model.md).
+    public static readonly Rule LargeNewFile =
+        new(new RuleId("LARGE_NEW_FILE_INTRODUCED"), "Large New File Introduced", Severity.Medium, RiskDimension.ChangeManagement);
+
     /// <summary>The original five fixed V1 rules, in the fixed order used for CheckResult output (FR-011 from 001-pr-risk-analysis-v1), plus later phases' additions appended after them.</summary>
     public static readonly IReadOnlyList<Rule> All =
     [
@@ -79,5 +84,6 @@ public static class RuleCatalog
         InsecureConfiguration,
         VulnerableDependency,
         BusinessCriticalPath,
+        LargeNewFile,
     ];
 }
