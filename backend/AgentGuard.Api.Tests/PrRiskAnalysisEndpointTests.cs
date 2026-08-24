@@ -34,8 +34,8 @@ public class PrRiskAnalysisEndpointTests : IClassFixture<WebApplicationFactory<P
         body!.Score.Should().Be(0);
         body.Classification.Should().Be("LOW");
         body.Recommendation.Should().Be("SAFE_TO_REVIEW");
-        // 10, not 9, since 010-todo-stub-detection appended TODO_STUB_INTRODUCED.
-        body.Checks.Should().HaveCount(10);
+        // 11, not 10, since 011-insecure-configuration-detection appended INSECURE_CONFIGURATION_INTRODUCED.
+        body.Checks.Should().HaveCount(11);
         body.Checks.Should().OnlyContain(c => c.Passed);
         body.Findings.Should().BeEmpty();
     }
