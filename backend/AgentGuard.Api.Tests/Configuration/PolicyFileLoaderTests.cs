@@ -81,6 +81,40 @@ public class PolicyFileLoaderTests
     }
 
     [Fact]
+    public void Loads_mandatory_review_dimensions_from_a_well_formed_file()
+    {
+        var path = WriteTempFile("""{ "mandatoryReviewDimensions": ["BUSINESS_CRITICALITY", "SECURITY"] }""");
+
+        var policy = PolicyFileLoader.Load(path);
+
+        policy.RiskGovernancePolicy.MandatoryReviewDimensions.Should().BeEquivalentTo(
+        [
+            AgentGuard.Core.RiskEngine.RiskDimension.BusinessCriticality,
+            AgentGuard.Core.RiskEngine.RiskDimension.Security,
+        ]);
+    }
+
+    [Fact]
+    public void Throws_a_clear_error_for_an_unrecognized_dimension_name()
+    {
+        var path = WriteTempFile("""{ "mandatoryReviewDimensions": ["NOT_A_REAL_DIMENSION"] }""");
+
+        var act = () => PolicyFileLoader.Load(path);
+
+        act.Should().Throw<InvalidOperationException>().WithMessage("*NOT_A_REAL_DIMENSION*");
+    }
+
+    [Fact]
+    public void Defaults_to_an_empty_governance_policy_when_the_section_is_absent()
+    {
+        var path = WriteTempFile("""{ "forbiddenDependencies": [] }""");
+
+        var policy = PolicyFileLoader.Load(path);
+
+        policy.RiskGovernancePolicy.MandatoryReviewDimensions.Should().BeEmpty();
+    }
+
+    [Fact]
     public void Ignores_unrecognized_extra_fields_rather_than_failing()
     {
         var path = WriteTempFile("""

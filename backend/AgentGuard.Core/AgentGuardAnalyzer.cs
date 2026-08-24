@@ -13,13 +13,16 @@ public sealed class AgentGuardAnalyzer
 {
     private readonly ForbiddenDependencyConfig _forbiddenDependencyConfig;
     private readonly PolicyEngine.BusinessCriticalPathConfig _businessCriticalPathConfig;
+    private readonly RiskEngine.RiskGovernancePolicy _riskGovernancePolicy;
 
     public AgentGuardAnalyzer(
         ForbiddenDependencyConfig? forbiddenDependencyConfig = null,
-        PolicyEngine.BusinessCriticalPathConfig? businessCriticalPathConfig = null)
+        PolicyEngine.BusinessCriticalPathConfig? businessCriticalPathConfig = null,
+        RiskEngine.RiskGovernancePolicy? riskGovernancePolicy = null)
     {
         _forbiddenDependencyConfig = forbiddenDependencyConfig ?? ForbiddenDependencyConfig.Empty;
         _businessCriticalPathConfig = businessCriticalPathConfig ?? PolicyEngine.BusinessCriticalPathConfig.Empty;
+        _riskGovernancePolicy = riskGovernancePolicy ?? RiskEngine.RiskGovernancePolicy.Empty;
     }
 
     public RiskEngine.RiskAnalysisResult Analyze(
@@ -55,7 +58,7 @@ public sealed class AgentGuardAnalyzer
             })
             .ToList();
 
-        var scored = RiskEngine.RiskEngine.Evaluate(allFindings, thresholds);
+        var scored = RiskEngine.RiskEngine.Evaluate(allFindings, thresholds, _riskGovernancePolicy);
 
         return new RiskEngine.RiskAnalysisResult(
             RepositoryName: changeSet.RepositoryName,
@@ -65,6 +68,7 @@ public sealed class AgentGuardAnalyzer
             Classification: scored.Classification,
             Recommendation: scored.Recommendation,
             RecommendationForcedByOverride: scored.RecommendationForcedByOverride,
+            RecommendationForcedByGovernancePolicy: scored.RecommendationForcedByGovernancePolicy,
             Checks: checks,
             Findings: allFindings);
     }
