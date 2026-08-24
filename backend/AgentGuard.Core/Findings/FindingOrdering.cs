@@ -10,6 +10,6 @@ public static class FindingOrdering
     public static IReadOnlyList<Finding> Stable(IEnumerable<Finding> findings) =>
         findings
             .OrderByDescending(f => f.Severity)
-            .ThenBy(f => f.RuleId)
+            .ThenBy(f => f.RuleId.Value, StringComparer.Ordinal)
             .ToList();
 }

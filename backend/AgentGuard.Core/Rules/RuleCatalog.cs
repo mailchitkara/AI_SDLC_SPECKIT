@@ -36,6 +36,11 @@ public static class RuleCatalog
     public static readonly Rule SwallowedException =
         new(new RuleId("SWALLOWED_EXCEPTION_INTRODUCED"), "Newly Swallowed Exception", Severity.High, RiskDimension.Reliability);
 
+    // 009-generated-file-contamination: fourth Phase 2 addition, appended after SwallowedException
+    // to preserve the existing eight rules' relative order (data-model.md).
+    public static readonly Rule GeneratedFileModified =
+        new(new RuleId("GENERATED_FILE_MODIFIED"), "Hand-Edited Generated File", Severity.Medium, RiskDimension.ChangeManagement);
+
     /// <summary>The original five fixed V1 rules, in the fixed order used for CheckResult output (FR-011 from 001-pr-risk-analysis-v1), plus later phases' additions appended after them.</summary>
     public static readonly IReadOnlyList<Rule> All =
     [
@@ -47,5 +52,6 @@ public static class RuleCatalog
         OverlyPermissiveAccess,
         DisabledTest,
         SwallowedException,
+        GeneratedFileModified,
     ];
 }
