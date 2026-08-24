@@ -34,9 +34,8 @@ public class PrRiskAnalysisEndpointTests : IClassFixture<WebApplicationFactory<P
         body!.Score.Should().Be(0);
         body.Classification.Should().Be("LOW");
         body.Recommendation.Should().Be("SAFE_TO_REVIEW");
-        // 13, not 12, since 013-business-critical-path-detection appended BUSINESS_CRITICAL_PATH_TOUCHED
-        // (it always registers a check, even with the default empty config — it just never fires).
-        body.Checks.Should().HaveCount(13);
+        // 14, not 13, since 014-large-new-file-detection appended LARGE_NEW_FILE_INTRODUCED.
+        body.Checks.Should().HaveCount(14);
         body.Checks.Should().OnlyContain(c => c.Passed);
         body.Findings.Should().BeEmpty();
     }
