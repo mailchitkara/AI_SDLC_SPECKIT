@@ -34,8 +34,8 @@ public class PrRiskAnalysisEndpointTests : IClassFixture<WebApplicationFactory<P
         body!.Score.Should().Be(0);
         body.Classification.Should().Be("LOW");
         body.Recommendation.Should().Be("SAFE_TO_REVIEW");
-        // 7, not 6, since 007-disabled-test-detection appended DISABLED_TEST_INTRODUCED.
-        body.Checks.Should().HaveCount(7);
+        // 8, not 7, since 008-swallowed-exception-detection appended SWALLOWED_EXCEPTION_INTRODUCED.
+        body.Checks.Should().HaveCount(8);
         body.Checks.Should().OnlyContain(c => c.Passed);
         body.Findings.Should().BeEmpty();
     }
