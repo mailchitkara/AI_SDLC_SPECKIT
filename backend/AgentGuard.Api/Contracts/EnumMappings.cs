@@ -67,6 +67,7 @@ public static class EnumMappings
         RiskDimension.Dependencies => "DEPENDENCIES",
         RiskDimension.Reliability => "RELIABILITY",
         RiskDimension.Configuration => "CONFIGURATION",
+        RiskDimension.BusinessCriticality => "BUSINESS_CRITICALITY",
         _ => throw new ArgumentOutOfRangeException(nameof(dimension), dimension, "Unknown risk dimension."),
     };
 
