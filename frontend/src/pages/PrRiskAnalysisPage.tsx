@@ -117,6 +117,14 @@ export function PrRiskAnalysisPage() {
           </svg>
         </span>
         <h1 className={styles.title}>AgentGuard</h1>
+        <a
+          className={styles.helpLink}
+          href="https://github.com/mailchitkara/AI_SDLC_SPECKIT/blob/main/docs/HELP.md"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Help
+        </a>
       </div>
       <p className={styles.tagline}>Deterministic pull request risk analysis.</p>
 

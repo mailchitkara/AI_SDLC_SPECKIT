@@ -11,6 +11,24 @@
   margin-bottom: 0.35rem;
 }
 
+.helpLink {
+  margin-left: auto;
+  padding: 0.4rem 0.85rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.helpLink:hover,
+.helpLink:focus-visible {
+  background: var(--color-surface-alt);
+  color: var(--color-text);
+}
+
 .logo {
   display: inline-flex;
   align-items: center;
