@@ -41,6 +41,11 @@ public static class RuleCatalog
     public static readonly Rule GeneratedFileModified =
         new(new RuleId("GENERATED_FILE_MODIFIED"), "Hand-Edited Generated File", Severity.Medium, RiskDimension.ChangeManagement);
 
+    // 010-todo-stub-detection: fifth Phase 2 addition, appended after GeneratedFileModified to
+    // preserve the existing nine rules' relative order (data-model.md).
+    public static readonly Rule TodoStub =
+        new(new RuleId("TODO_STUB_INTRODUCED"), "Newly Introduced TODO or Stub", Severity.Medium, RiskDimension.ChangeManagement);
+
     /// <summary>The original five fixed V1 rules, in the fixed order used for CheckResult output (FR-011 from 001-pr-risk-analysis-v1), plus later phases' additions appended after them.</summary>
     public static readonly IReadOnlyList<Rule> All =
     [
@@ -53,5 +58,6 @@ public static class RuleCatalog
         DisabledTest,
         SwallowedException,
         GeneratedFileModified,
+        TodoStub,
     ];
 }
