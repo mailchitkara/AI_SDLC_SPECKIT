@@ -1,11 +1,19 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using AgentGuard.Api.Contracts;
 using AgentGuard.Core.PolicyEngine;
+using AgentGuard.Core.RiskEngine;
 
 namespace AgentGuard.Api.Configuration;
 
-/// <summary>015-policy-as-code: the two operator-configurable rule seams, loaded together.</summary>
-public sealed record LoadedPolicy(ForbiddenDependencyConfig ForbiddenDependencies, BusinessCriticalPathConfig BusinessCriticalPaths);
+/// <summary>
+/// 015-policy-as-code / 016-mandatory-review-gate: the operator-configurable rule seams and
+/// governance policy, loaded together.
+/// </summary>
+public sealed record LoadedPolicy(
+    ForbiddenDependencyConfig ForbiddenDependencies,
+    BusinessCriticalPathConfig BusinessCriticalPaths,
+    RiskGovernancePolicy RiskGovernancePolicy);
 
 /// <summary>
 /// FR-001 through FR-004: loads ForbiddenDependencyConfig/BusinessCriticalPathConfig from a single
@@ -19,7 +27,7 @@ public static class PolicyFileLoader
     {
         if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
         {
-            return new LoadedPolicy(ForbiddenDependencyConfig.Empty, BusinessCriticalPathConfig.Empty);
+            return new LoadedPolicy(ForbiddenDependencyConfig.Empty, BusinessCriticalPathConfig.Empty, RiskGovernancePolicy.Empty);
         }
 
         PolicyFileContent? content;
@@ -47,9 +55,26 @@ public static class PolicyFileLoader
             .Select(p => new BusinessCriticalPath(p.PathPattern, p.Label))
             .ToList();
 
+        // 016-mandatory-review-gate FR-006: an unrecognized dimension name fails loudly, matching
+        // this loader's existing malformed-content philosophy (research.md §5) — a typo would
+        // otherwise silently mean the gate the operator configured never applies.
+        var mandatoryReviewDimensions = (content.MandatoryReviewDimensions ?? [])
+            .Select(name =>
+            {
+                if (!EnumMappings.TryParseRiskDimension(name, out var dimension))
+                {
+                    throw new InvalidOperationException(
+                        $"AgentGuard policy file at '{filePath}' has an unrecognized risk dimension '{name}' in mandatoryReviewDimensions.");
+                }
+
+                return dimension;
+            })
+            .ToList();
+
         return new LoadedPolicy(
             new ForbiddenDependencyConfig(forbiddenDependencies),
-            new BusinessCriticalPathConfig(businessCriticalPaths));
+            new BusinessCriticalPathConfig(businessCriticalPaths),
+            new RiskGovernancePolicy(mandatoryReviewDimensions));
     }
 
     private static readonly JsonSerializerOptions JsonOptions = new()
@@ -59,7 +84,8 @@ public static class PolicyFileLoader
 
     private sealed record PolicyFileContent(
         [property: JsonPropertyName("forbiddenDependencies")] List<ForbiddenDependencyEntry>? ForbiddenDependencies,
-        [property: JsonPropertyName("businessCriticalPaths")] List<BusinessCriticalPathEntry>? BusinessCriticalPaths);
+        [property: JsonPropertyName("businessCriticalPaths")] List<BusinessCriticalPathEntry>? BusinessCriticalPaths,
+        [property: JsonPropertyName("mandatoryReviewDimensions")] List<string>? MandatoryReviewDimensions);
 
     private sealed record ForbiddenDependencyEntry(
         [property: JsonPropertyName("from")] string From,

@@ -87,6 +87,25 @@ public static class EnumMappings
         _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "Unknown finding kind."),
     };
 
+    /// <summary>016-mandatory-review-gate: parses a policy-file dimension string using the same
+    /// wire-format names ToApiString(RiskDimension) already defines.</summary>
+    public static bool TryParseRiskDimension(string? value, out RiskDimension dimension)
+    {
+        switch (value)
+        {
+            case "SECURITY": dimension = RiskDimension.Security; return true;
+            case "TESTING": dimension = RiskDimension.Testing; return true;
+            case "COMPATIBILITY": dimension = RiskDimension.Compatibility; return true;
+            case "ARCHITECTURE": dimension = RiskDimension.Architecture; return true;
+            case "CHANGE_MANAGEMENT": dimension = RiskDimension.ChangeManagement; return true;
+            case "DEPENDENCIES": dimension = RiskDimension.Dependencies; return true;
+            case "RELIABILITY": dimension = RiskDimension.Reliability; return true;
+            case "CONFIGURATION": dimension = RiskDimension.Configuration; return true;
+            case "BUSINESS_CRITICALITY": dimension = RiskDimension.BusinessCriticality; return true;
+            default: dimension = default; return false;
+        }
+    }
+
     public static bool TryParseExternalSeverity(string? value, out ExternalSeverity severity)
     {
         switch (value)

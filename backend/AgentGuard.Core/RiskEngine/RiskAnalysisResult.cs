@@ -26,5 +26,6 @@ public sealed record RiskAnalysisResult(
     RiskClassification Classification,
     Recommendation Recommendation,
     bool RecommendationForcedByOverride,
+    bool RecommendationForcedByGovernancePolicy,
     IReadOnlyList<CheckResult> Checks,
     IReadOnlyList<Finding> Findings);

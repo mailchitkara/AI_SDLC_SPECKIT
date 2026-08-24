@@ -45,6 +45,7 @@ builder.Services.AddCors(options =>
 var loadedPolicy = PolicyFileLoader.Load(Environment.GetEnvironmentVariable("AGENTGUARD_POLICY_FILE_PATH"));
 builder.Services.AddSingleton(loadedPolicy.ForbiddenDependencies);
 builder.Services.AddSingleton(loadedPolicy.BusinessCriticalPaths);
+builder.Services.AddSingleton(loadedPolicy.RiskGovernancePolicy);
 builder.Services.AddSingleton<AgentGuardAnalyzer>();
 
 // GitHub requires a User-Agent on every request; base address keeps GitHubPullRequestClient's

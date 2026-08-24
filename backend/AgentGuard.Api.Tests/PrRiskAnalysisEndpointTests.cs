@@ -38,6 +38,10 @@ public class PrRiskAnalysisEndpointTests : IClassFixture<WebApplicationFactory<P
         body.Checks.Should().HaveCount(14);
         body.Checks.Should().OnlyContain(c => c.Passed);
         body.Findings.Should().BeEmpty();
+        // 016-mandatory-review-gate: no governance policy is wired up in this test host (matching
+        // production, since no AGENTGUARD_POLICY_FILE_PATH is set) -- always false, byte-for-byte
+        // unchanged from before this feature existed.
+        body.RecommendationForcedByGovernancePolicy.Should().BeFalse();
     }
 
     [Fact]

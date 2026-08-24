@@ -143,7 +143,56 @@ public class RiskEngineTests
         findings.Where(f => f.MandatoryOverride).Should().ContainSingle().Which.Should().BeSameAs(overriding);
     }
 
-    private static Finding MakeFinding(Severity severity, bool mandatoryOverride = false) =>
+    // --- 016-mandatory-review-gate ---
+
+    [Fact]
+    public void Evaluate_floors_recommendation_at_human_review_required_when_a_finding_matches_a_governed_dimension()
+    {
+        var findings = new[] { MakeFinding(Severity.Low, dimension: RiskDimension.BusinessCriticality) }; // score 10 alone would be SafeToReview
+        var policy = new RiskEngine.RiskGovernancePolicy([RiskDimension.BusinessCriticality]);
+
+        var result = RiskEngineUnderTest.Evaluate(findings, governancePolicy: policy);
+
+        result.Recommendation.Should().Be(Recommendation.HumanReviewRequired);
+        result.RecommendationForcedByGovernancePolicy.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Evaluate_leaves_recommendation_unchanged_when_no_governance_policy_is_configured()
+    {
+        var findings = new[] { MakeFinding(Severity.Low, dimension: RiskDimension.BusinessCriticality) };
+
+        var result = RiskEngineUnderTest.Evaluate(findings);
+
+        result.Recommendation.Should().Be(Recommendation.SafeToReview);
+        result.RecommendationForcedByGovernancePolicy.Should().BeFalse();
+    }
+
+    [Fact]
+    public void Evaluate_does_not_attribute_block_merge_to_the_governance_policy_when_mandatory_override_already_caused_it()
+    {
+        var findings = new[] { MakeFinding(Severity.Low, mandatoryOverride: true, dimension: RiskDimension.BusinessCriticality) };
+        var policy = new RiskEngine.RiskGovernancePolicy([RiskDimension.BusinessCriticality]);
+
+        var result = RiskEngineUnderTest.Evaluate(findings, governancePolicy: policy);
+
+        result.Recommendation.Should().Be(Recommendation.BlockMerge);
+        result.RecommendationForcedByOverride.Should().BeTrue();
+        result.RecommendationForcedByGovernancePolicy.Should().BeFalse();
+    }
+
+    [Fact]
+    public void Evaluate_does_not_attribute_human_review_required_to_the_policy_when_score_already_reached_it_alone()
+    {
+        var findings = new[] { MakeFinding(Severity.High), MakeFinding(Severity.High), MakeFinding(Severity.High, dimension: RiskDimension.BusinessCriticality) }; // score 100+ -> already HumanReviewRequired or higher on its own
+        var policy = new RiskEngine.RiskGovernancePolicy([RiskDimension.BusinessCriticality]);
+
+        var result = RiskEngineUnderTest.Evaluate(findings, governancePolicy: policy);
+
+        result.RecommendationForcedByGovernancePolicy.Should().BeFalse();
+    }
+
+    private static Finding MakeFinding(Severity severity, bool mandatoryOverride = false, RiskDimension dimension = RiskDimension.Security) =>
         new(
             RuleCatalog.SecretDetected.Id,
             "Test Rule",
@@ -152,7 +201,7 @@ public class RiskEngineTests
             "evidence",
             null,
             "remediation",
-            RiskDimension.Security,
+            dimension,
             Confidence.Certain,
             FindingKind.Deterministic,
             mandatoryOverride);

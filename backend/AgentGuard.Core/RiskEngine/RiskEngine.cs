@@ -6,7 +6,8 @@ public readonly record struct ScoredRisk(
     int Score,
     RiskClassification Classification,
     Recommendation Recommendation,
-    bool RecommendationForcedByOverride);
+    bool RecommendationForcedByOverride,
+    bool RecommendationForcedByGovernancePolicy);
 
 /// <summary>
 /// Pure function: (findings, thresholds) -> (score, classification, recommendation). No I/O, no
@@ -16,9 +17,13 @@ public readonly record struct ScoredRisk(
 /// </summary>
 public static class RiskEngine
 {
-    public static ScoredRisk Evaluate(IReadOnlyList<Finding> findings, ThresholdConfiguration? thresholds = null)
+    public static ScoredRisk Evaluate(
+        IReadOnlyList<Finding> findings,
+        ThresholdConfiguration? thresholds = null,
+        RiskGovernancePolicy? governancePolicy = null)
     {
         var effectiveThresholds = thresholds ?? ThresholdConfiguration.Default;
+        var effectiveGovernancePolicy = governancePolicy ?? RiskGovernancePolicy.Empty;
 
         // FR-012 + FR-013: sum severity weights, capped at 100 — unchanged by this feature (FR-009).
         var score = Math.Min(100, findings.Sum(f => SeverityWeights.WeightOf(f.Severity)));
@@ -27,11 +32,17 @@ public static class RiskEngine
 
         // FR-010/FR-012: a mandatory-override finding forces BLOCK_MERGE regardless of score/bands.
         var forcedByOverride = findings.Any(f => f.MandatoryOverride);
-        var recommendation = forcedByOverride
+        var preFloorRecommendation = forcedByOverride
             ? Recommendation.BlockMerge
             : RecommendationFor(classification);
 
-        return new ScoredRisk(score, classification, recommendation, forcedByOverride);
+        // 016-mandatory-review-gate: a floor applied after scoring/override, never a ceiling and
+        // never lower than what the pipeline already produced (research.md §1, §3).
+        var matchesGovernedDimension = findings.Any(f => effectiveGovernancePolicy.MandatoryReviewDimensions.Contains(f.Dimension));
+        var forcedByGovernancePolicy = matchesGovernedDimension && preFloorRecommendation < Recommendation.HumanReviewRequired;
+        var recommendation = forcedByGovernancePolicy ? Recommendation.HumanReviewRequired : preFloorRecommendation;
+
+        return new ScoredRisk(score, classification, recommendation, forcedByOverride, forcedByGovernancePolicy);
     }
 
     // FR-007: classification bands are configurable; V1's fixed bands are just the default.

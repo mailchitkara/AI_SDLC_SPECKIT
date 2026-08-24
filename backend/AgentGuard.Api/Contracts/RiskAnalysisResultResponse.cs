@@ -29,6 +29,7 @@ public sealed record RiskAnalysisResultResponse(
     string Classification,
     string Recommendation,
     bool RecommendationForcedByOverride,
+    bool RecommendationForcedByGovernancePolicy,
     IReadOnlyList<CheckResultResponse> Checks,
     IReadOnlyList<FindingResponse> Findings,
     IReadOnlyList<PartiallyEvaluatedFileResponse> PartiallyEvaluatedFiles);
@@ -47,6 +48,7 @@ public static class RiskAnalysisResultResponseMapping
         Classification: result.Classification.ToApiString(),
         Recommendation: result.Recommendation.ToApiString(),
         RecommendationForcedByOverride: result.RecommendationForcedByOverride,
+        RecommendationForcedByGovernancePolicy: result.RecommendationForcedByGovernancePolicy,
         Checks: result.Checks.Select(c => new CheckResultResponse(c.RuleId.ToApiString(), c.RuleName, c.Passed)).ToList(),
         Findings: result.Findings.Select(f => new FindingResponse(
                 f.RuleId.ToApiString(),
