@@ -1,7 +1,7 @@
+using AgentGuard.Api.Configuration;
 using AgentGuard.Api.Endpoints;
 using AgentGuard.Api.GitHub;
 using AgentGuard.Core;
-using AgentGuard.Core.PolicyEngine;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,8 +39,12 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod());
 });
 
-// V1 ships with no forbidden dependency relationships configured (FR-006, research.md §5).
-builder.Services.AddSingleton(ForbiddenDependencyConfig.Empty);
+// 015-policy-as-code: loads ForbiddenDependencyConfig/BusinessCriticalPathConfig from an optional
+// operator-supplied JSON file (AGENTGUARD_POLICY_FILE_PATH). Unset/missing -> both empty, identical
+// to this service's behavior before this feature existed (FR-002, FR-003).
+var loadedPolicy = PolicyFileLoader.Load(Environment.GetEnvironmentVariable("AGENTGUARD_POLICY_FILE_PATH"));
+builder.Services.AddSingleton(loadedPolicy.ForbiddenDependencies);
+builder.Services.AddSingleton(loadedPolicy.BusinessCriticalPaths);
 builder.Services.AddSingleton<AgentGuardAnalyzer>();
 
 // GitHub requires a User-Agent on every request; base address keeps GitHubPullRequestClient's
