@@ -29,6 +29,7 @@ public sealed class AgentGuardAnalyzer
             (RuleCatalog.OverlyPermissiveAccess, OverlyPermissiveAccessRule.Evaluate(changeSet)),
             (RuleCatalog.DisabledTest, DisabledTestRule.Evaluate(changeSet)),
             (RuleCatalog.SwallowedException, SwallowedExceptionRule.Evaluate(changeSet)),
+            (RuleCatalog.GeneratedFileModified, GeneratedFileModifiedRule.Evaluate(changeSet)),
         };
 
         var allFindings = FindingOrdering.Stable(findingsByRule.SelectMany(rf => rf.Findings));
