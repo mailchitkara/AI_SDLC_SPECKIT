@@ -31,6 +31,11 @@ public static class RuleCatalog
     public static readonly Rule DisabledTest =
         new(new RuleId("DISABLED_TEST_INTRODUCED"), "Newly Disabled Test", Severity.High, RiskDimension.Testing);
 
+    // 008-swallowed-exception-detection: third Phase 2 addition, appended after DisabledTest to
+    // preserve the existing seven rules' relative order (data-model.md).
+    public static readonly Rule SwallowedException =
+        new(new RuleId("SWALLOWED_EXCEPTION_INTRODUCED"), "Newly Swallowed Exception", Severity.High, RiskDimension.Reliability);
+
     /// <summary>The original five fixed V1 rules, in the fixed order used for CheckResult output (FR-011 from 001-pr-risk-analysis-v1), plus later phases' additions appended after them.</summary>
     public static readonly IReadOnlyList<Rule> All =
     [
@@ -41,5 +46,6 @@ public static class RuleCatalog
         SecretDetected,
         OverlyPermissiveAccess,
         DisabledTest,
+        SwallowedException,
     ];
 }
