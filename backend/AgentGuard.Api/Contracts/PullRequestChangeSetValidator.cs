@@ -35,6 +35,7 @@ public static class PullRequestChangeSetValidator
         }
 
         errors.AddRange(ThresholdConfigurationRequestValidator.Validate(request.Thresholds));
+        errors.AddRange(VulnerableDependencyRequestValidator.Validate(request.VulnerableDependencies));
 
         return errors;
     }

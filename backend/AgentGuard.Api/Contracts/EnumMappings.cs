@@ -1,4 +1,5 @@
 using AgentGuard.Core;
+using AgentGuard.Core.Dependencies;
 using AgentGuard.Core.Findings;
 using AgentGuard.Core.Rules;
 using AgentGuard.Core.RiskEngine;
@@ -84,4 +85,16 @@ public static class EnumMappings
         FindingKind.Contextual => "CONTEXTUAL",
         _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "Unknown finding kind."),
     };
+
+    public static bool TryParseExternalSeverity(string? value, out ExternalSeverity severity)
+    {
+        switch (value)
+        {
+            case "LOW": severity = ExternalSeverity.Low; return true;
+            case "MODERATE": severity = ExternalSeverity.Moderate; return true;
+            case "HIGH": severity = ExternalSeverity.High; return true;
+            case "CRITICAL": severity = ExternalSeverity.Critical; return true;
+            default: severity = default; return false;
+        }
+    }
 }

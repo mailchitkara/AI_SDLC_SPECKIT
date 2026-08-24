@@ -19,6 +19,7 @@ public sealed record PullRequestChangeSetRequest
     public string? PrTitle { get; init; }
     public List<ChangedFileRequest>? ChangedFiles { get; init; }
     public ThresholdConfigurationRequest? Thresholds { get; init; }
+    public List<VulnerableDependencyRequest>? VulnerableDependencies { get; init; }
 }
 
 public static class PullRequestChangeSetRequestMapping

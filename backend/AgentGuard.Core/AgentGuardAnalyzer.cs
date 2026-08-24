@@ -1,3 +1,4 @@
+using AgentGuard.Core.Dependencies;
 using AgentGuard.Core.Findings;
 using AgentGuard.Core.PolicyEngine;
 using AgentGuard.Core.Rules;
@@ -17,7 +18,10 @@ public sealed class AgentGuardAnalyzer
         _forbiddenDependencyConfig = forbiddenDependencyConfig ?? ForbiddenDependencyConfig.Empty;
     }
 
-    public RiskEngine.RiskAnalysisResult Analyze(PullRequestChangeSet changeSet, RiskEngine.ThresholdConfiguration? thresholds = null)
+    public RiskEngine.RiskAnalysisResult Analyze(
+        PullRequestChangeSet changeSet,
+        RiskEngine.ThresholdConfiguration? thresholds = null,
+        IReadOnlyList<VulnerableDependency>? vulnerableDependencies = null)
     {
         var findingsByRule = new (Rule Rule, IReadOnlyList<Finding> Findings)[]
         {
@@ -32,6 +36,7 @@ public sealed class AgentGuardAnalyzer
             (RuleCatalog.GeneratedFileModified, GeneratedFileModifiedRule.Evaluate(changeSet)),
             (RuleCatalog.TodoStub, TodoStubRule.Evaluate(changeSet)),
             (RuleCatalog.InsecureConfiguration, InsecureConfigurationRule.Evaluate(changeSet)),
+            (RuleCatalog.VulnerableDependency, VulnerableDependencyRule.Evaluate(vulnerableDependencies ?? [])),
         };
 
         var allFindings = FindingOrdering.Stable(findingsByRule.SelectMany(rf => rf.Findings));

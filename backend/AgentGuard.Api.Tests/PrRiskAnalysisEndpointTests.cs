@@ -34,8 +34,8 @@ public class PrRiskAnalysisEndpointTests : IClassFixture<WebApplicationFactory<P
         body!.Score.Should().Be(0);
         body.Classification.Should().Be("LOW");
         body.Recommendation.Should().Be("SAFE_TO_REVIEW");
-        // 11, not 10, since 011-insecure-configuration-detection appended INSECURE_CONFIGURATION_INTRODUCED.
-        body.Checks.Should().HaveCount(11);
+        // 12, not 11, since 012-vulnerable-dependency-adapter appended VULNERABLE_DEPENDENCY_DETECTED.
+        body.Checks.Should().HaveCount(12);
         body.Checks.Should().OnlyContain(c => c.Passed);
         body.Findings.Should().BeEmpty();
     }
@@ -177,5 +177,100 @@ public class PrRiskAnalysisEndpointTests : IClassFixture<WebApplicationFactory<P
         body.Should().NotBeNull();
         body!.Errors.Should().NotBeEmpty();
         body.Errors.Should().Contain(e => e.Contains("repositoryName"));
+    }
+
+    // 012-vulnerable-dependency-adapter US1: the vulnerableDependencies adapter field.
+
+    [Fact]
+    public async Task A_supplied_vulnerable_dependency_produces_a_finding_end_to_end()
+    {
+        var request = new PullRequestChangeSetRequest
+        {
+            RepositoryName = "agentguard-demo",
+            PrNumber = 70,
+            PrTitle = "Bump dependencies",
+            ChangedFiles = [],
+            VulnerableDependencies =
+            [
+                new VulnerableDependencyRequest
+                {
+                    PackageName = "left-pad",
+                    Version = "1.3.0",
+                    Severity = "HIGH",
+                    AdvisoryId = "GHSA-xxxx-xxxx-xxxx",
+                },
+            ],
+        };
+
+        var response = await _client.PostAsJsonAsync("/api/pr-risk-analysis", request);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var body = await response.Content.ReadFromJsonAsync<RiskAnalysisResultResponse>();
+        var finding = body!.Findings.Should().ContainSingle(f => f.RuleId == "VULNERABLE_DEPENDENCY_DETECTED").Subject;
+        finding.Dimension.Should().Be("DEPENDENCIES");
+        finding.Severity.Should().Be("HIGH");
+        finding.Confidence.Should().Be("CERTAIN");
+        finding.Kind.Should().Be("DETERMINISTIC");
+        finding.Evidence.Should().Contain("left-pad@1.3.0").And.Contain("GHSA-xxxx-xxxx-xxxx");
+    }
+
+    [Fact]
+    public async Task Omitting_vulnerable_dependencies_entirely_produces_the_same_result_as_before_this_feature()
+    {
+        var request = new PullRequestChangeSetRequest
+        {
+            RepositoryName = "agentguard-demo",
+            PrNumber = 1,
+            PrTitle = "Update README",
+            ChangedFiles = [],
+        };
+
+        var response = await _client.PostAsJsonAsync("/api/pr-risk-analysis", request);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var body = await response.Content.ReadFromJsonAsync<RiskAnalysisResultResponse>();
+        body!.Score.Should().Be(0);
+        body.Findings.Should().BeEmpty();
+        body.Checks.Should().OnlyContain(c => c.Passed);
+    }
+
+    [Fact]
+    public async Task An_unrecognized_severity_returns_400()
+    {
+        var request = new PullRequestChangeSetRequest
+        {
+            RepositoryName = "agentguard-demo",
+            PrNumber = 72,
+            PrTitle = "Bump dependencies",
+            ChangedFiles = [],
+            VulnerableDependencies =
+            [
+                new VulnerableDependencyRequest { PackageName = "left-pad", Version = "1.3.0", Severity = "SEVERE" },
+            ],
+        };
+
+        var response = await _client.PostAsJsonAsync("/api/pr-risk-analysis", request);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task A_missing_package_name_returns_400()
+    {
+        var request = new PullRequestChangeSetRequest
+        {
+            RepositoryName = "agentguard-demo",
+            PrNumber = 73,
+            PrTitle = "Bump dependencies",
+            ChangedFiles = [],
+            VulnerableDependencies =
+            [
+                new VulnerableDependencyRequest { Version = "1.3.0", Severity = "HIGH" },
+            ],
+        };
+
+        var response = await _client.PostAsJsonAsync("/api/pr-risk-analysis", request);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 }
