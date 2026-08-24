@@ -26,6 +26,11 @@ public static class RuleCatalog
     public static readonly Rule OverlyPermissiveAccess =
         new(new RuleId("OVERLY_PERMISSIVE_ACCESS_CONTROL"), "Overly Permissive Access Control", Severity.High, RiskDimension.Security);
 
+    // 007-disabled-test-detection: second Phase 2 addition, appended after OverlyPermissiveAccess
+    // to preserve the existing six rules' relative order (data-model.md).
+    public static readonly Rule DisabledTest =
+        new(new RuleId("DISABLED_TEST_INTRODUCED"), "Newly Disabled Test", Severity.High, RiskDimension.Testing);
+
     /// <summary>The original five fixed V1 rules, in the fixed order used for CheckResult output (FR-011 from 001-pr-risk-analysis-v1), plus later phases' additions appended after them.</summary>
     public static readonly IReadOnlyList<Rule> All =
     [
@@ -35,5 +40,6 @@ public static class RuleCatalog
         ArchitectureViolation,
         SecretDetected,
         OverlyPermissiveAccess,
+        DisabledTest,
     ];
 }

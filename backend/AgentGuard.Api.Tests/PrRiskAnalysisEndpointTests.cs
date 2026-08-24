@@ -34,8 +34,8 @@ public class PrRiskAnalysisEndpointTests : IClassFixture<WebApplicationFactory<P
         body!.Score.Should().Be(0);
         body.Classification.Should().Be("LOW");
         body.Recommendation.Should().Be("SAFE_TO_REVIEW");
-        // 6, not 5, since 006-security-risk-rules appended OVERLY_PERMISSIVE_ACCESS_CONTROL.
-        body.Checks.Should().HaveCount(6);
+        // 7, not 6, since 007-disabled-test-detection appended DISABLED_TEST_INTRODUCED.
+        body.Checks.Should().HaveCount(7);
         body.Checks.Should().OnlyContain(c => c.Passed);
         body.Findings.Should().BeEmpty();
     }
