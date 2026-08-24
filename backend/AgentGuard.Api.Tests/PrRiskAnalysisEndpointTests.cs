@@ -34,8 +34,9 @@ public class PrRiskAnalysisEndpointTests : IClassFixture<WebApplicationFactory<P
         body!.Score.Should().Be(0);
         body.Classification.Should().Be("LOW");
         body.Recommendation.Should().Be("SAFE_TO_REVIEW");
-        // 12, not 11, since 012-vulnerable-dependency-adapter appended VULNERABLE_DEPENDENCY_DETECTED.
-        body.Checks.Should().HaveCount(12);
+        // 13, not 12, since 013-business-critical-path-detection appended BUSINESS_CRITICAL_PATH_TOUCHED
+        // (it always registers a check, even with the default empty config — it just never fires).
+        body.Checks.Should().HaveCount(13);
         body.Checks.Should().OnlyContain(c => c.Passed);
         body.Findings.Should().BeEmpty();
     }

@@ -12,10 +12,14 @@ namespace AgentGuard.Core;
 public sealed class AgentGuardAnalyzer
 {
     private readonly ForbiddenDependencyConfig _forbiddenDependencyConfig;
+    private readonly PolicyEngine.BusinessCriticalPathConfig _businessCriticalPathConfig;
 
-    public AgentGuardAnalyzer(ForbiddenDependencyConfig? forbiddenDependencyConfig = null)
+    public AgentGuardAnalyzer(
+        ForbiddenDependencyConfig? forbiddenDependencyConfig = null,
+        PolicyEngine.BusinessCriticalPathConfig? businessCriticalPathConfig = null)
     {
         _forbiddenDependencyConfig = forbiddenDependencyConfig ?? ForbiddenDependencyConfig.Empty;
+        _businessCriticalPathConfig = businessCriticalPathConfig ?? PolicyEngine.BusinessCriticalPathConfig.Empty;
     }
 
     public RiskEngine.RiskAnalysisResult Analyze(
@@ -37,6 +41,7 @@ public sealed class AgentGuardAnalyzer
             (RuleCatalog.TodoStub, TodoStubRule.Evaluate(changeSet)),
             (RuleCatalog.InsecureConfiguration, InsecureConfigurationRule.Evaluate(changeSet)),
             (RuleCatalog.VulnerableDependency, VulnerableDependencyRule.Evaluate(vulnerableDependencies ?? [])),
+            (RuleCatalog.BusinessCriticalPath, BusinessCriticalPathRule.Evaluate(changeSet, _businessCriticalPathConfig)),
         };
 
         var allFindings = FindingOrdering.Stable(findingsByRule.SelectMany(rf => rf.Findings));
